@@ -89,13 +89,13 @@ Step 4: Install dependencies
    ↓ Downloads all dependencies
 
 Step 5: Build for production (pnpm build)
-   ↓ Creates optimized production build in ./docs folder
+   ↓ Creates optimized production build in ./dist folder
 
 Step 6: Setup Pages
    ↓ Configures GitHub Pages settings
 
 Step 7: Upload artifact
-   ↓ Packages the ./docs folder for deployment
+   ↓ Packages the ./dist folder for deployment
    ↓
    ↓ (waits for BUILD JOB to complete)
    ↓
@@ -204,7 +204,7 @@ Your source code (src/*.vue, src/*.ts)
    ↓ - Optimizes images and assets
    ↓ - Applies Tailwind CSS
    ↓
-Output: ./docs folder
+Output: ./dist folder
    ├── index.html (entry point)
    ├── assets/
    │   ├── index-[hash].js (your code, bundled)
@@ -212,9 +212,9 @@ Output: ./docs folder
    └── [images/icons]
 ```
 
-This `./docs` folder is what gets deployed to GitHub Pages.
+This `./dist` folder is what gets deployed to GitHub Pages.
 
-### Why `./docs` is ignored in git
+### Why `./dist` is ignored in git
 
 **Problem**: Build files are large, change constantly, and are auto-generated
 **Solution**: Don't track them in git, generate them fresh each deployment
@@ -226,7 +226,7 @@ This `./docs` folder is what gets deployed to GitHub Pages.
 - Merge conflicts on build files
 
 **Now** (proper way):
-- `docs/` is in `.gitignore`
+- `dist/` is in `.gitignore`
 - GitHub Actions builds fresh each time
 - Git only tracks source code
 - Cleaner history
@@ -326,7 +326,7 @@ git push --force origin prod
 │     ↓                                                    │
 │  8. ⚡ Deploy Workflow triggers automatically            │
 │     ├─ Build production bundle                          │
-│     ├─ Package ./docs folder                           │
+│     ├─ Package ./dist folder                           │
 │     └─ Deploy to GitHub Pages                          │
 │     ↓                                                    │
 │  9. 🌐 Site updates at:                                 │
@@ -385,7 +385,7 @@ git checkout prod       # Switch to prod
 1. **Work on `main`** - push whenever you want, CI checks quality
 2. **Merge to `prod`** - only when ready to release, triggers deployment
 3. **GitHub Actions** - robots that test and deploy for you automatically
-4. **`./docs` folder** - ignored in git, built fresh each deployment
+4. **`./dist` folder** - ignored in git, built fresh each deployment
 
 That's it! The robots (GitHub Actions) handle the testing and deployment for you. You just write code and decide when to release. 🤖
 
@@ -413,9 +413,9 @@ That's it! The robots (GitHub Actions) handle the testing and deployment for you
 - Try deleting node_modules and pnpm-lock.yaml, then pnpm install
 
 **Q: CI fails with "packages field missing or empty"?**
-- You have a `pnpm-workspace.yaml` file you don't need
-- This file is only for monorepos (multiple packages)
-- Solution: Delete `pnpm-workspace.yaml`
+- `pnpm-workspace.yaml` is required — do **not** delete it
+- It declares `onlyBuiltDependencies` for `@firebase/util` and `protobufjs` (pnpm 10 hard-fails builds of native/postinstall packages without this list)
+- Solution: Make sure `pnpm-workspace.yaml` is present and lists those packages. If the error persists, run `pnpm install` to regenerate `pnpm-lock.yaml`
 
 ---
 

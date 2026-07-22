@@ -8,21 +8,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Unit test suite with 20+ tests covering core functionality
-- Comprehensive JSDoc documentation for all complex functions
-- ARIA labels throughout the UI for better accessibility
-- GitHub Actions CI/CD workflow
-- GitHub issue and PR templates
-- Code of Conduct (Contributor Covenant v2.1)
-- Detailed contributing guidelines
+- Rich monster stat blocks: level, AC, perception, saves, speed, resistances,
+  weaknesses, immunities, traits, family, source, attacks, and abilities for
+  all 410 Monster Core entries (scraped from Archives of Nethys)
+- `Combatant.applyTypedDamage(amount, type)` — auto-applies resistances,
+  weaknesses, and immunities per PF2e RAW (weakness first)
+- `Condition` duration system: `duration` (rounds or null), `expiresOn`
+  (start/end of turn), `persistentDamage`, `description`
+- Schema migration framework (`src/serialization.ts`) with v1→v2 migrator
+- Archives of Nethys scraper (`scripts/parse-aon-monsters.mjs`) with Zod
+  validation, throttling, retries, and `--source/--all/--force/--elite/--weak`
+  flags
+- `src/composables/useSettings.ts` — single source of truth for app settings
+- ESLint 9 flat config + Prettier formatting
+- `pnpm lint`, `pnpm format`, `pnpm update-monsters` scripts
+- Vite `manualChunks` — monster-data and Firebase split into separate lazy-loaded
+  chunks (main bundle 60% smaller)
+- ImportMetaEnv type augmentation for Firebase env vars
+- Deployment guide ([DEPLOYMENT.md](DEPLOYMENT.md))
 
 ### Changed
-- TypeScript prop types now use primitives (`number`, `Combatant[]`) instead of wrappers
-- Default combatants changed from personal campaign to iconic Pathfinder characters
-- Portuguese translation now covers all UI elements including help text
+- DnD 5e support dropped entirely (pathfinder-only focus)
+- Dead files removed: `firebase.config.template.ts`, `scripts/parse-pf2e-monsters.cjs`
+- `useStorage` refs for settings consolidated into `useSettings` composable
+- Hand-rolled reset-confirm modal replaced with reka-ui `AlertDialog`
+- Theme button: always-visible icon buttons (fixed touch device support)
+- Temp HP follows PF2e RAW: takes the higher of existing or new (was incorrectly stacking)
+- `changeConditionValue()` (no-arg) renamed to `decrementAllConditions()` for clarity
+- CI now runs `lint → test → type-check → build` on every push/PR
+- Unit test suite expanded to 37 tests (was 21)
 
 ### Fixed
-- Removed debug console.log statements from production code
+- Stale doc references: build output directory corrected from `./docs` to `./dist`
+- `pnpm-workspace.yaml` troubleshooting note corrected (file is required, not deletable)
 
 ## [1.0.0] - YYYY-MM-DD
 

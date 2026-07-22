@@ -31,7 +31,7 @@ pnpm preview
 
 ## Build Configuration
 
-- Build output directory is `./docs` (configured for GitHub Pages deployment)
+- Build output directory is `./dist` (configured for GitHub Pages deployment)
 - Uses vue-tsc for type checking before build
 
 ## Architecture

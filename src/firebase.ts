@@ -69,7 +69,7 @@ export function useFirebaseSync<T>(
     read: (value: any) => T
     write: (value: T) => any
   },
-  onReady?: () => void
+  onReady?: () => void,
 ): Ref<T> {
   if (!database) {
     throw new Error('Firebase not initialized. Call initializeFirebase() first.')
@@ -111,7 +111,7 @@ export function useFirebaseSync<T>(
         })
       }
     },
-    { deep: true }
+    { deep: true },
   )
 
   // Only register lifecycle hook if we're in a component context

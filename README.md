@@ -9,30 +9,6 @@ A modern, themeable initiative tracker for Pathfinder 2e combat encounters with 
 
 **[🎮 Live Demo](https://valforte.github.io/Initiative-Tracker/)**
 
-<!-- TODO: Add screenshot or animated GIF here
-Suggested content to showcase:
-- Split screen showing DM view on left with full controls (HP management, visibility toggles, condition tracking)
-- Player view on right showing the clean, read-only interface
-- Highlight a few key features:
-  * Different visibility states (show a hidden combatant in DM view that's not visible in player view)
-  * HP bars and conditions
-  * Current turn highlighted
-  * Theme selector dropdown
-- Alternative: Animated GIF showing:
-  1. Adding a combatant
-  2. Dealing damage (showing temp HP absorption)
-  3. Adding a condition
-  4. Advancing to next turn
-  5. Switching to player view
-Recommended tools:
-- Screenshot: Built-in OS screenshot tool
-- GIF: LICEcap (free), Kap (macOS), or ScreenToGif (Windows)
-- Optimal size: 1200px wide for best README display
-Example markdown once you have the image:
-![Initiative Tracker Demo](docs/demo.gif)
-or
-![DM and Player Views](docs/screenshot.png)
--->
 ## DM View:
 <img width="1833" height="1521" alt="image" src="https://github.com/user-attachments/assets/dcd346cb-8ef0-4b48-b8af-5c8bef17e617" />
 
@@ -61,7 +37,8 @@ or
 - Manage temporary HP separately from regular HP
 - Bulk spawn multiple creatures with auto-colored names
 - Add and track conditions with values (e.g., "Frightened 2")
-- Integrated monster list from Pathfinder 2e Monster Core and Age of Ashes
+- Integrated monster database from Pathfinder 2e Monster Core (410 monsters with
+  full stat blocks — level, AC, saves, resistances/weaknesses, attacks, abilities)
 - Quick reference help tooltips for all major features
 
 ### Player Features
@@ -84,8 +61,8 @@ or
 ## Installation
 
 ### Prerequisites
-- Node.js (v18 or higher recommended)
-- pnpm (or npm/yarn)
+- Node.js v20 or higher
+- pnpm 10+ (or npm/yarn — pnpm recommended)
 
 ### Setup
 
@@ -103,17 +80,37 @@ pnpm dev
 
 The app will be available at `http://localhost:5173`
 
+### Player View
+
+Add `?view=player` to the dev URL for the read-only player view:
+```
+http://localhost:5173/?view=player
+```
+
 ### Build for Production
 
 ```bash
 # Type-check and build
 pnpm build
 
-# Preview production build
+# Preview production build locally
 pnpm preview
 ```
 
-Build output is generated in the `./docs` directory (configured for GitHub Pages deployment).
+Build output is generated in the `./dist` directory (gitignored, built fresh
+each deploy). See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for deployment options.
+
+### Code Quality
+
+```bash
+pnpm lint           # ESLint — 0 errors expected
+pnpm format         # Prettier — format all source files
+pnpm format:check   # Verify formatting without writing
+pnpm test           # Run unit tests (37 tests)
+pnpm run type-check # TypeScript type checking
+```
+
+CI runs `lint → test → type-check → build` on every push/PR.
 
 ## Usage
 
@@ -189,10 +186,27 @@ If you need to run multiple tables simultaneously:
 ## Pathfinder 2e Integration
 
 This tracker is specifically designed for [Pathfinder 2e](https://paizo.com/pathfinder) by Paizo Inc. It includes:
-- Pre-loaded monster database from Monster Core and Age of Ashes AP
+- Pre-loaded monster database from **Monster Core** (410 monsters, enriched from [Archives of Nethys](https://2e.aonprd.com))
+- Full stat blocks: level, AC, perception, saves, speed, resistances, weaknesses, immunities, traits, family, source, attacks, and abilities
 - Official condition names and descriptions in English and Portuguese
-- Temporary HP tracking (common in PF2e)
+- Temp HP tracking that follows PF2e RAW (temp HP does not stack — takes the higher)
 - Multi-stage conditions (e.g., Dying 1, 2, 3)
+
+### Updating Monster Data
+
+Monster stat blocks are scraped from Archives of Nethys and stored as committed
+JSON files in `src/data/pathfinder/`. To re-scrape or add new sources:
+
+```bash
+pnpm update-monsters                           # update default sources only
+node scripts/parse-aon-monsters.mjs --all       # update all sources
+node scripts/parse-aon-monsters.mjs --source monster-core
+node scripts/parse-aon-monsters.mjs --source monster-core --force  # re-fetch all
+```
+
+The scraper throttles requests (1/sec), validates each entry against a Zod
+schema, and preserves existing `enabledByDefault` flags. See
+[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for more details.
 
 While built for PF2e, the tracker can be adapted for any d20 system or tabletop RPG.
 
@@ -208,7 +222,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Built with [Vue 3](https://vuejs.org/), [Tailwind CSS](https://tailwindcss.com/), and [DaisyUI](https://daisyui.com/)
 - Icons by [Iconify](https://iconify.design/)
-- Monster data from Pathfinder 2e Monster Core and Age of Ashes Adventure Path
+- Monster data from [Archives of Nethys](https://2e.aonprd.com)
 - Inspired by the need for a clean, modern initiative tracker for in-person play
 
 ## Support

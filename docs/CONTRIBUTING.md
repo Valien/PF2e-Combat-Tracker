@@ -22,8 +22,8 @@ By participating in this project, you agree to maintain a respectful and inclusi
 ## Getting Started
 
 ### Prerequisites
-- Node.js (v18 or higher)
-- pnpm (recommended) or npm/yarn
+- Node.js v20 or higher
+- pnpm 10+ (recommended) or npm/yarn
 - Git
 - A code editor (VS Code recommended)
 
@@ -168,11 +168,13 @@ const { t } = useTranslations()
 ```
 
 ### Code Quality
+- Run `pnpm lint` and `pnpm format` before committing — CI enforces both
 - Remove `console.log()` statements before committing
 - Avoid commented-out code
 - Write clear comments for complex logic
 - Keep functions small and focused
 - Avoid deep nesting
+- Write tests for changes to `src/functions.ts` (run `pnpm test:watch` during development)
 
 ## Submitting Changes
 
@@ -288,8 +290,11 @@ console.log(localStorage) // View stored data
 ```
 
 ### Adding New Monsters/Conditions
-- Monsters: Add to `src/db.ts` in appropriate array
-- Conditions: Add to both EN and PT-BR sections in `src/db.ts`
+- Monsters: Run `pnpm update-monsters` to re-scrape from Archives of Nethys, or
+  edit the JSON files in `src/data/pathfinder/` directly. Each source JSON has
+  an `id`, `name`, `enabledByDefault`, and a `monsters` array. See
+  [DEPLOYMENT.md](DEPLOYMENT.md) for scraper usage.
+- Conditions: Add to both `en` and `pt_BR` sections in `src/db.ts`
 
 ### Component Architecture
 ```

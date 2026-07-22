@@ -1,19 +1,18 @@
 <script setup lang="ts">
-import {PopoverContent, PopoverRoot, PopoverTrigger} from "reka-ui";
-
+import { PopoverContent, PopoverRoot, PopoverTrigger } from 'reka-ui'
 </script>
 
 <template>
   <PopoverRoot>
-    <PopoverTrigger asChild>
+    <PopoverTrigger as-child>
       <span class="pl-2 underline cursor-pointer">?</span>
     </PopoverTrigger>
-    <PopoverContent className="z-50 mt-2 p-2 rounded-md shadow-md/50 bg-base-100 text-base-content text-lg w-full text-left">
+    <PopoverContent
+      class-name="z-50 mt-2 p-2 rounded-md shadow-md/50 bg-base-100 text-base-content text-lg w-full text-left"
+    >
       <slot></slot>
     </PopoverContent>
   </PopoverRoot>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

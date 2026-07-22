@@ -5,7 +5,8 @@ This directory contains all project documentation for the Pathfinder 2e Initiati
 ## Contents
 
 ### User Guides
-- **[QUICK_START.md](QUICK_START.md)** - Quick start guide for local usage
+- **[QUICK_START.md](QUICK_START.md)** - Quick start guide for local usage and development
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Deployment options (GitHub Pages, self-hosting, Docker)
 - **[ONLINE_MODE_QUICK_START.md](ONLINE_MODE_QUICK_START.md)** - Quick setup guide for online mode
 - **[ONLINE_MODE_SETUP.md](ONLINE_MODE_SETUP.md)** - Detailed online mode configuration
 

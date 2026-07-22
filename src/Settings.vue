@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import {computed} from "vue";
-import {useTranslations} from "./lang.ts";
-import {useStorage} from "@vueuse/core";
-import {getContentSourcesBySystem, getDefaultEnabledSources, type GameSystem} from "./db.ts";
-import {Icon} from "@iconify/vue";
+import { computed } from 'vue'
+import { useTranslations } from './lang.ts'
+import { getContentSources } from './db.ts'
+import { useTempHP, useEnabledContentSources } from './composables/useSettings'
+import { Icon } from '@iconify/vue'
 
 const { t } = useTranslations()
 
@@ -20,32 +20,20 @@ const emit = defineEmits<{
   (e: 'close'): void
 }>()
 
-// Settings stored in localStorage
-const useTempHP = useStorage('useTempHP', true)
-const gameSystem = useStorage<GameSystem>('gameSystem', 'pathfinder')
+// Settings stored in localStorage (module-singleton refs)
+const tempHPEnabled = useTempHP()
+const enabledContentSources = useEnabledContentSources()
 
-// Initialize enabled content sources using defaults from JSON files
-const enabledContentSources = useStorage<string[]>(
-  'enabledContentSources',
-  getDefaultEnabledSources('pathfinder')
-)
-
-// Get available content sources for current system
+// Get available content sources
 const availableContentSources = computed(() => {
-  return getContentSourcesBySystem(gameSystem.value)
+  return getContentSources()
 })
-
-// When system changes, reset enabled sources to defaults from JSON files
-function onSystemChange(newSystem: GameSystem) {
-  gameSystem.value = newSystem
-  enabledContentSources.value = getDefaultEnabledSources(newSystem)
-}
 
 // Toggle content source
 function toggleContentSource(sourceId: string) {
   const index = enabledContentSources.value.indexOf(sourceId)
   if (index > -1) {
-    enabledContentSources.value = enabledContentSources.value.filter(id => id !== sourceId)
+    enabledContentSources.value = enabledContentSources.value.filter((id) => id !== sourceId)
   } else {
     enabledContentSources.value = [...enabledContentSources.value, sourceId]
   }
@@ -59,11 +47,7 @@ function requestReset() {
 
 <template>
   <!-- Modal backdrop and container -->
-  <div
-    v-if="isOpen"
-    class="modal modal-open"
-    @click.self="$emit('close')"
-  >
+  <div v-if="isOpen" class="modal modal-open" @click.self="$emit('close')">
     <div class="modal-box max-w-lg max-h-[90vh]">
       <!-- Close button -->
       <button
@@ -73,56 +57,34 @@ function requestReset() {
         <Icon icon="tabler:x" height="20" />
       </button>
 
-      <h3 class="font-bold text-lg mb-4">{{t.options.settings}}</h3>
+      <h3 class="font-bold text-lg mb-4">{{ t.options.settings }}</h3>
 
       <div class="flex flex-col gap-4">
         <!-- Online Mode Toggle (DM only) -->
         <div v-if="isDMView" class="flex items-center justify-between">
           <label class="label cursor-pointer gap-2">
             <input
-                type="checkbox"
-                class="toggle"
-                :checked="isOnlineMode"
-                @change="(e) => $emit('toggleOnlineMode', (e.target as HTMLInputElement).checked)"
+              type="checkbox"
+              class="toggle"
+              :checked="isOnlineMode"
+              @change="(e) => $emit('toggleOnlineMode', (e.target as HTMLInputElement).checked)"
             />
-            <span class="label-text">{{t.dm_actions.onlineMode}}</span>
+            <span class="label-text">{{ t.dm_actions.onlineMode }}</span>
           </label>
         </div>
 
         <!-- Use Temporary HP Toggle -->
         <div class="flex items-center justify-between">
           <label class="label cursor-pointer gap-2">
-            <input
-                type="checkbox"
-                class="toggle"
-                v-model="useTempHP"
-            />
-            <span class="label-text">{{t.options.useTempHP}}</span>
+            <input v-model="tempHPEnabled" type="checkbox" class="toggle" />
+            <span class="label-text">{{ t.options.useTempHP }}</span>
           </label>
         </div>
 
-        <!-- Game System Toggle -->
+        <!-- Content Sources Submenu -->
         <div class="flex flex-col gap-2">
-          <div class="flex items-center justify-between">
-            <button
-              class="btn btn-sm flex-1"
-              :class="{'btn-primary': gameSystem === 'pathfinder', 'btn-ghost': gameSystem !== 'pathfinder'}"
-              @click="onSystemChange('pathfinder')"
-            >
-              {{t.options.pathfinder}}
-            </button>
-            <button
-              class="btn btn-sm flex-1"
-              :class="{'btn-primary': gameSystem === 'dnd5e', 'btn-ghost': gameSystem !== 'dnd5e'}"
-              @click="onSystemChange('dnd5e')"
-            >
-              {{t.options.dnd5e}}
-            </button>
-          </div>
-
-          <!-- Content Sources Submenu -->
           <div class="border border-base-content/10 rounded-lg p-3 bg-base-200">
-            <div class="text-sm font-semibold mb-2">{{t.options.contents}}</div>
+            <div class="text-sm font-semibold mb-2">{{ t.options.contents }}</div>
             <div class="flex flex-col gap-1 h-[420px] overflow-y-auto pr-2">
               <label
                 v-for="source in availableContentSources"
@@ -135,18 +97,15 @@ function requestReset() {
                   :checked="enabledContentSources.includes(source.id)"
                   @change="() => toggleContentSource(source.id)"
                 />
-                <span class="label-text text-sm">{{source.name}}</span>
+                <span class="label-text text-sm">{{ source.name }}</span>
               </label>
             </div>
           </div>
 
           <!-- Reset to Defaults Button -->
-          <button
-            class="btn btn-error btn-sm w-full"
-            @click="requestReset"
-          >
+          <button class="btn btn-error btn-sm w-full" @click="requestReset">
             <Icon icon="tabler:refresh" height="20" />
-            {{t.options.resetToDefaults}}
+            {{ t.options.resetToDefaults }}
           </button>
         </div>
       </div>
@@ -154,5 +113,4 @@ function requestReset() {
   </div>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>
