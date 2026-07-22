@@ -126,6 +126,23 @@ Then open **http://localhost:8080/** (DM view) or
 To stop: `docker compose down`. Other devices on your network can connect
 using your machine's LAN IP (e.g. `http://192.168.1.50:8080/`).
 
+### Apple Container
+
+```bash
+container system start
+container build -t initiative-tracker:latest .
+container run -d --name initiative-tracker -p 8080:80 initiative-tracker:latest
+```
+
+Rebuilding the container for a new build
+
+```
+container stop initiative-tracker
+container rm initiative-tracker
+container build -t initiative-tracker:latest .
+container run -d --name initiative-tracker -p 8080:80 initiative-tracker:latest
+```
+
 ## Usage
 
 ### DM View (Default)
