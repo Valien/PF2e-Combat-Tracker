@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import DMTable from './DMTable.vue'
+import { ref, computed, watch } from 'vue'
+import CombatantCard from './CombatantCard.vue'
+import InitiativeStrip from './InitiativeStrip.vue'
 import Settings from './Settings.vue'
 import { Combatant, Visibility } from './functions.ts'
 import { Icon } from '@iconify/vue'
@@ -21,19 +22,28 @@ import {
   PopoverRoot,
   PopoverTrigger,
 } from 'reka-ui'
-import { getEnabledMonsters, type Monster } from './db.ts'
+import { getEnabledMonsters, useConditions, type Monster } from './db.ts'
 import { useEnabledContentSources } from './composables/useSettings'
-import { computed, watch } from 'vue'
 
-const { t } = useTranslations()
+const { t, lang } = useTranslations()
+const conditions = computed(() => useConditions(lang.value))
 
 const emit = defineEmits<{
   (e: 'nextTurn'): void
   (e: 'reset'): void
   (e: 'resetToDefaults'): void
-  (e: 'newCombatant', name: string, HP: number, initiative: number, visibility: Visibility): void
+  (
+    e: 'newCombatant',
+    name: string,
+    HP: number,
+    initiative: number,
+    visibility: Visibility,
+    extras?: Record<string, unknown>,
+  ): void
   (e: 'removeCombatant', index: number): void
   (e: 'toggleOnlineMode', value: boolean): void
+  (e: 'saveParty'): void
+  (e: 'loadParty'): void
 }>()
 
 const props = defineProps<{
@@ -51,15 +61,13 @@ const isSettingsOpen = ref(false)
 const newName = ref('')
 const newHP = ref(1)
 const newInitiative = ref(1)
-const newVisibility = ref(Visibility.None)
+const newVisibility = ref(Visibility.Half)
 const newQuantity = ref(1)
 const isNewCombatantPopoverOpen = ref(false)
 
-// Get enabled content sources and generate monster list
 const enabledContentSources = useEnabledContentSources()
 const monsterList = computed<Monster[]>(() => getEnabledMonsters(enabledContentSources.value))
 
-// Watch for monster selection and auto-fill HP if available
 watch(newName, (selectedName) => {
   const monster = monsterList.value.find((m) => m.name === selectedName)
   if (monster && monster.hp > 1) {
@@ -76,22 +84,13 @@ function clearNewCombatant(): void {
   newName.value = ''
   newHP.value = 1
   newInitiative.value = 1
-  newVisibility.value = Visibility.None
+  newVisibility.value = Visibility.Half
   newQuantity.value = 1
   document.getElementById('newName')?.focus()
 }
 
-/**
- * Generates a unique name for multiple combatants spawned at once
- * Uses Pathfinder pawn colors (Red, Green, Blue, Purple, Pink, Brown) for the first 6,
- * then falls back to numbers for additional spawns
- * @param i - Index of the combatant being spawned (0-based)
- * @returns The combatant name with color/number suffix, or plain name if quantity is 1
- */
 function getCombatantName(i: number): string {
-  if (i == 0 && newQuantity.value == 1) {
-    return newName.value
-  }
+  if (i == 0 && newQuantity.value == 1) return newName.value
   switch (i) {
     case 0:
       return `${newName.value} (${t.value.colors.red})`
@@ -111,44 +110,81 @@ function getCombatantName(i: number): string {
 }
 
 function addCombatant(): void {
+  const monster = monsterList.value.find((m) => m.name === newName.value)
   for (let i = 0; i < newQuantity.value; i++) {
-    emit('newCombatant', getCombatantName(i), newHP.value, newInitiative.value, newVisibility.value)
+    const extras = monster
+      ? {
+          type: 'monster' as const,
+          level: monster.level,
+          ac: monster.ac,
+          perception: monster.perception,
+          fortitude: monster.fortitude,
+          reflex: monster.reflex,
+          will: monster.will,
+          speed: monster.speed,
+          resistances: monster.resistances,
+          weaknesses: monster.weaknesses,
+          immunities: monster.immunities,
+          traits: monster.traits,
+          family: monster.family,
+          source: monster.source,
+          attacks: monster.attacks,
+          abilities: monster.abilities,
+          aonUrl: monster.url,
+        }
+      : undefined
+    emit(
+      'newCombatant',
+      getCombatantName(i),
+      newHP.value,
+      newInitiative.value,
+      newVisibility.value,
+      extras,
+    )
   }
   isNewCombatantPopoverOpen.value = false
   setTimeout(clearNewCombatant, 1)
+}
+
+const hasPartyRoster = computed(() => {
+  const roster = localStorage.getItem('partyRoster')
+  return roster && JSON.parse(roster).length > 0
+})
+
+function saveParty() {
+  const pcs = props.combatants.filter((c) => c.visibility === 2 || c.type === 'pc')
+  const serialized = pcs.map((c) => JSON.stringify(c))
+  localStorage.setItem('partyRoster', JSON.stringify(serialized))
+}
+
+function loadParty() {
+  emit('loadParty')
 }
 
 function removeCombatant(index: number): void {
   emit('removeCombatant', index)
 }
 
-/**
- * Reset confirmation dialog handlers
- */
 function requestReset() {
   showResetConfirm.value = true
 }
-
 function cancelReset() {
   showResetConfirm.value = false
 }
-
 function confirmReset() {
   showResetConfirm.value = false
   emit('resetToDefaults')
 }
+function confirmClearAll() {
+  showResetConfirm.value = false
+  emit('reset')
+}
 
-/**
- * Copy player view URL to clipboard
- * Constructs URL with session ID and view=player parameter
- */
 async function copyPlayerUrl(): Promise<void> {
   if (!props.sessionId) return
-
   const url = new URL(window.location.href)
   url.searchParams.set('session', props.sessionId)
   url.searchParams.set('view', 'player')
-
   try {
     await navigator.clipboard.writeText(url.toString())
     showCopiedMessage.value = true
@@ -162,159 +198,144 @@ async function copyPlayerUrl(): Promise<void> {
 </script>
 
 <template>
-  <div>
-    <div>
-      <article class="prose ml-8">
-        <h3>{{ t.table.round }} {{ round }}</h3>
-      </article>
-      <DMTable
-        :combatants="combatants"
-        :turn="turn"
-        class="shadow-md/50"
-        @remove-combatant="removeCombatant"
-      />
-      <div class="grid grid-cols-1 gap-4">
-        <div class="flex gap-4">
-          <button
-            class="btn btn-neutral"
-            :aria-label="t.dm_actions.next"
-            @click="$emit('nextTurn')"
-          >
-            <Icon icon="tabler:player-skip-forward" height="24" />{{ t.dm_actions.next }}
-          </button>
-          <button
-            class="btn btn-error tooltip tooltip-bottom before:delay-200"
-            :data-tip="t.dm_actions.resetTooltip"
-            :aria-label="t.dm_actions.reset"
-            @click="$emit('reset')"
-          >
-            <Icon icon="tabler:refresh" height="24" />{{ t.dm_actions.reset }}
-          </button>
-          <a
-            v-if="!isOnlineMode"
-            class="btn btn-neutral"
-            href="?view=player"
-            :aria-label="t.dm_actions.playerView"
-            ><Icon icon="tabler:users-group" height="24" />{{ t.dm_actions.playerView }}</a
-          >
-          <button
-            v-else
-            class="btn btn-neutral relative"
-            :aria-label="t.dm_actions.copyPlayerUrl"
-            @click="copyPlayerUrl"
-          >
-            <Icon icon="tabler:users-group" height="24" />
-            {{ t.dm_actions.copyPlayerUrl }}
-            <div
-              v-if="showCopiedMessage"
-              class="absolute -top-12 left-1/2 -translate-x-1/2 badge badge-success"
-            >
-              {{ t.dm_actions.copiedToClipboard }}
-            </div>
-          </button>
-        </div>
-        <div class="flex gap-4">
-          <button
-            class="btn btn-neutral"
-            :aria-label="t.options.settings"
-            @click="isSettingsOpen = true"
-          >
-            <Icon icon="tabler:settings" height="24" />
-            {{ t.options.settings }}
-          </button>
-        </div>
-        <div class="flex gap-4">
-          <PopoverRoot
-            :open="isNewCombatantPopoverOpen"
-            @update:open="(value) => (isNewCombatantPopoverOpen = value)"
-          >
-            <PopoverTrigger as-child>
-              <button class="btn btn-neutral" :aria-label="t.dm_actions.add">
-                <Icon icon="tabler:plus" height="24" /> {{ t.dm_actions.add }}
-              </button>
-            </PopoverTrigger>
-            <PopoverPortal>
-              <PopoverContent
-                class="card w-96 bg-base-300 card-md shadow-l"
-                role="dialog"
-                aria-label="Add new combatant"
-              >
-                <div class="card-body" @keydown.enter.prevent="addCombatant">
-                  <div class="grid grid-cols-3 items-center gap-4">
-                    <Label for="newName">{{ t.table.name }}</Label>
-                    <input
-                      id="newName"
-                      v-model="newName"
-                      tabindex="1"
-                      type="text"
-                      class="input col-span-2 h-8"
-                      list="monsters"
-                      aria-label="Combatant name"
-                    />
-                    <datalist id="monsters">
-                      <option v-for="monster in monsterList" :key="monster.name">
-                        {{ monster.name }}
-                      </option>
-                    </datalist>
-                  </div>
-                  <div class="grid grid-cols-3 items-center gap-4">
-                    <Label for="newHP">{{ t.table.hp }}</Label>
-                    <NumberFieldRoot v-model="newHP" :min="1" class="col-span-2">
-                      <NumberFieldInput id="newHP" tabindex="2" class="input h-8" />
-                    </NumberFieldRoot>
-                  </div>
-                  <div class="grid grid-cols-3 items-center gap-4">
-                    <Label for="newInitiative">{{ t.table.initiative }}</Label>
-                    <NumberFieldRoot v-model="newInitiative" :min="1" class="col-span-2">
-                      <NumberFieldInput id="newInitiative" tabindex="3" class="input h-8" />
-                    </NumberFieldRoot>
-                  </div>
-                  <div class="grid grid-cols-3 items-center gap-4">
-                    <Label for="newInitiative">{{ t.dm_actions.quantity }}</Label>
-                    <NumberFieldRoot v-model="newQuantity" :min="1" class="col-span-2">
-                      <NumberFieldInput id="newQuantity" tabindex="3" class="input h-8" />
-                    </NumberFieldRoot>
-                  </div>
-                  <div class="flex justify-end gap-2">
-                    <button
-                      tabindex="4"
-                      class="btn btn-neutral btn-sm"
-                      @click="changeNewVisibility"
-                    >
-                      <Icon
-                        v-if="newVisibility === Visibility.Full"
-                        icon="tabler:eye"
-                        height="24"
-                      />
-                      <Icon
-                        v-else-if="newVisibility === Visibility.Half"
-                        icon="tabler:eye-off"
-                        height="24"
-                      />
-                      <Icon
-                        v-else-if="newVisibility === Visibility.None"
-                        icon="tabler:eye-closed"
-                        height="24"
-                      />
-                    </button>
-                    <button tabindex="5" class="btn btn-error btn-sm" @click="clearNewCombatant">
-                      <Icon icon="tabler:eraser" height="24" />{{ t.dm_actions.clear }}
-                    </button>
-                    <button tabindex="6" class="btn btn-neutral btn-sm" @click="addCombatant">
-                      <Icon icon="tabler:plus" height="24" />{{ t.dm_actions.add }}
-                    </button>
-                  </div>
-                </div>
-                <PopoverArrow class="fill-base-300" />
-              </PopoverContent>
-            </PopoverPortal>
-          </PopoverRoot>
-        </div>
+  <div class="space-y-3">
+    <!-- Initiative Strip -->
+    <InitiativeStrip :combatants="combatants" :turn="turn" />
+
+    <!-- Action Bar -->
+    <div class="flex flex-wrap items-center gap-2">
+      <div class="badge badge-lg badge-neutral gap-1 px-3 py-4">
+        <Icon icon="tabler:swords" height="18" />
+        <span class="font-bold">{{ t.table.round }} {{ round }}</span>
       </div>
+
+      <button class="btn btn-primary btn-sm" @click="$emit('nextTurn')">
+        <Icon icon="tabler:player-skip-forward" height="18" />{{ t.dm_actions.next }}
+      </button>
+
+      <button class="btn btn-error btn-sm" @click="requestReset">
+        <Icon icon="tabler:refresh" height="18" />{{ t.dm_actions.reset }}
+      </button>
+
+      <a v-if="!isOnlineMode" class="btn btn-neutral btn-sm" href="?view=player">
+        <Icon icon="tabler:users-group" height="18" />{{ t.dm_actions.playerView }}
+      </a>
+      <button v-else class="btn btn-neutral btn-sm relative" @click="copyPlayerUrl">
+        <Icon icon="tabler:users-group" height="18" />{{ t.dm_actions.copyPlayerUrl }}
+        <div
+          v-if="showCopiedMessage"
+          class="absolute -top-8 left-1/2 -translate-x-1/2 badge badge-success badge-sm"
+        >
+          {{ t.dm_actions.copiedToClipboard }}
+        </div>
+      </button>
+
+      <button class="btn btn-neutral btn-sm" @click="isSettingsOpen = true">
+        <Icon icon="tabler:settings" height="18" />{{ t.options.settings }}
+      </button>
+
+      <button class="btn btn-ghost btn-sm" :disabled="!combatants.length" @click="saveParty">
+        <Icon icon="tabler:users" height="18" />{{ t.card.saveParty }}
+      </button>
+      <button v-if="hasPartyRoster" class="btn btn-ghost btn-sm" @click="loadParty">
+        <Icon icon="tabler:users-plus" height="18" />{{ t.card.loadParty }}
+      </button>
+
+      <!-- Add Combatant Popover -->
+      <PopoverRoot
+        :open="isNewCombatantPopoverOpen"
+        @update:open="(v) => (isNewCombatantPopoverOpen = v)"
+      >
+        <PopoverTrigger as-child>
+          <button class="btn btn-accent btn-sm">
+            <Icon icon="tabler:plus" height="18" />{{ t.dm_actions.add }}
+          </button>
+        </PopoverTrigger>
+        <PopoverPortal>
+          <PopoverContent class="card w-96 bg-base-300 card-md shadow-xl z-50" role="dialog">
+            <div class="card-body" @keydown.enter.prevent="addCombatant">
+              <div class="grid grid-cols-3 items-center gap-3">
+                <Label for="newName" class="text-sm">{{ t.table.name }}</Label>
+                <input
+                  id="newName"
+                  v-model="newName"
+                  tabindex="1"
+                  type="text"
+                  class="input input-sm col-span-2"
+                  list="monsters"
+                />
+                <datalist id="monsters">
+                  <option
+                    v-for="monster in monsterList"
+                    :key="monster.name"
+                    :value="monster.name"
+                  />
+                </datalist>
+              </div>
+              <div class="grid grid-cols-3 items-center gap-3">
+                <Label for="newHP" class="text-sm">{{ t.table.hp }}</Label>
+                <NumberFieldRoot v-model="newHP" :min="1" class="col-span-2">
+                  <NumberFieldInput id="newHP" tabindex="2" class="input input-sm" />
+                </NumberFieldRoot>
+              </div>
+              <div class="grid grid-cols-3 items-center gap-3">
+                <Label for="newInitiative" class="text-sm">{{ t.table.initiative }}</Label>
+                <NumberFieldRoot v-model="newInitiative" :min="1" class="col-span-2">
+                  <NumberFieldInput id="newInitiative" tabindex="3" class="input input-sm" />
+                </NumberFieldRoot>
+              </div>
+              <div class="grid grid-cols-3 items-center gap-3">
+                <Label for="newQuantity" class="text-sm">{{ t.dm_actions.quantity }}</Label>
+                <NumberFieldRoot v-model="newQuantity" :min="1" class="col-span-2">
+                  <NumberFieldInput id="newQuantity" tabindex="4" class="input input-sm" />
+                </NumberFieldRoot>
+              </div>
+              <div class="flex justify-end gap-2">
+                <button class="btn btn-ghost btn-sm" @click="changeNewVisibility">
+                  <Icon v-if="newVisibility === Visibility.Full" icon="tabler:eye" height="18" />
+                  <Icon
+                    v-else-if="newVisibility === Visibility.Half"
+                    icon="tabler:eye-off"
+                    height="18"
+                  />
+                  <Icon v-else icon="tabler:eye-closed" height="18" />
+                </button>
+                <button class="btn btn-ghost btn-sm" @click="clearNewCombatant">
+                  <Icon icon="tabler:eraser" height="18" />{{ t.dm_actions.clear }}
+                </button>
+                <button class="btn btn-accent btn-sm" @click="addCombatant">
+                  <Icon icon="tabler:plus" height="18" />{{ t.dm_actions.add }}
+                </button>
+              </div>
+            </div>
+            <PopoverArrow class="fill-base-300" />
+          </PopoverContent>
+        </PopoverPortal>
+      </PopoverRoot>
     </div>
 
-    <!-- Reset Confirmation Dialog (reka-ui AlertDialog) -->
-    <AlertDialogRoot :open="showResetConfirm" @update:open="(value) => (showResetConfirm = value)">
+    <!-- Card Grid -->
+    <div v-if="combatants.length" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+      <CombatantCard
+        v-for="(combatant, i) in combatants"
+        :key="`${combatant.name}-${i}`"
+        :combatant="combatant"
+        :is-active="i === turn"
+        @remove="removeCombatant(i)"
+      />
+    </div>
+    <div v-else class="flex flex-col items-center justify-center py-20 text-base-content/30">
+      <Icon icon="tabler:swords" height="80" />
+      <p class="mt-4 text-lg">{{ t.card.noParty }}</p>
+    </div>
+
+    <!-- Condition datalist (shared by all cards) -->
+    <datalist id="conditions">
+      <option v-for="(condition, key) in conditions" :key="key" :value="condition.name" />
+    </datalist>
+
+    <!-- Reset Confirmation Dialog -->
+    <AlertDialogRoot :open="showResetConfirm" @update:open="(v) => (showResetConfirm = v)">
       <AlertDialogPortal>
         <AlertDialogOverlay class="fixed inset-0 bg-black/50 z-[9998]" />
         <AlertDialogContent
@@ -324,16 +345,18 @@ async function copyPlayerUrl(): Promise<void> {
             <div class="card-body">
               <AlertDialogTitle class="card-title text-error flex items-center gap-2">
                 <Icon icon="tabler:alert-triangle" height="24" />
-                {{ t.options.resetConfirmTitle }}
+                {{ t.dm_actions.reset }}
               </AlertDialogTitle>
               <AlertDialogDescription>{{ t.options.resetConfirmMessage }}</AlertDialogDescription>
-              <div class="card-actions justify-end mt-4">
+              <div class="card-actions justify-end mt-4 gap-2">
                 <button class="btn btn-ghost" @click="cancelReset">
                   {{ t.options.resetConfirmNo }}
                 </button>
+                <button class="btn btn-warning" @click="confirmClearAll">
+                  <Icon icon="tabler:trash" height="20" />{{ t.options.clearAll }}
+                </button>
                 <button class="btn btn-error" @click="confirmReset">
-                  <Icon icon="tabler:refresh" height="20" />
-                  {{ t.options.resetConfirmYes }}
+                  <Icon icon="tabler:refresh" height="20" />{{ t.options.resetConfirmYes }}
                 </button>
               </div>
             </div>
@@ -348,7 +371,7 @@ async function copyPlayerUrl(): Promise<void> {
       :session-id="sessionId"
       :is-d-m-view="true"
       :is-open="isSettingsOpen"
-      @toggle-online-mode="(value) => $emit('toggleOnlineMode', value)"
+      @toggle-online-mode="(v) => $emit('toggleOnlineMode', v)"
       @request-reset="requestReset"
       @close="isSettingsOpen = false"
     />

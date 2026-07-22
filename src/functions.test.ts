@@ -100,10 +100,13 @@ describe('Combatant - Visibility', () => {
     expect(combatant.visibility).toBe(Visibility.Half)
   })
 
-  it('should toggle between None and Half on left click', () => {
+  it('should cycle None → Half → Full → None on left click', () => {
     const combatant = new Combatant('Fighter', 25, 10, 25, [], Visibility.None)
     combatant.changeVisibility(false)
     expect(combatant.visibility).toBe(Visibility.Half)
+
+    combatant.changeVisibility(false)
+    expect(combatant.visibility).toBe(Visibility.Full)
 
     combatant.changeVisibility(false)
     expect(combatant.visibility).toBe(Visibility.None)

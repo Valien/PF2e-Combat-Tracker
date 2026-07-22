@@ -38,6 +38,7 @@ type TranslationStructure = {
     resetConfirmTitle: string
     resetConfirmMessage: string
     resetConfirmYes: string
+    clearAll: string
     resetConfirmNo: string
   }
   colors: {
@@ -47,6 +48,30 @@ type TranslationStructure = {
     purple: string
     pink: string
     brown: string
+  }
+  statBlock: {
+    level: string
+    ac: string
+    fortitude: string
+    reflex: string
+    will: string
+    speed: string
+    perception: string
+    resistances: string
+    weaknesses: string
+    immunities: string
+    traits: string
+    attacks: string
+    abilities: string
+    notes: string
+  }
+  card: {
+    pc: string
+    monster: string
+    npc: string
+    saveParty: string
+    loadParty: string
+    noParty: string
   }
   helpText: {
     actions: string[]
@@ -68,11 +93,11 @@ const translations: Record<Locale, TranslationStructure> = {
     dm_actions: {
       next: 'Next',
       reset: 'New combat',
-      resetTooltip: 'Reset Round and Turn count to 1',
+      resetTooltip: 'Clear all combatants for a new encounter',
       playerView: 'Player View',
       add: 'Add',
       clear: 'Clear',
-      quantity: 'Qty',
+      quantity: 'Quantity',
       onlineMode: 'Online Mode',
       copyPlayerUrl: 'Copy Player URL',
       copiedToClipboard: 'Copied to clipboard!',
@@ -88,10 +113,11 @@ const translations: Record<Locale, TranslationStructure> = {
       useTempHP: 'Use Temporary HP',
       contents: 'Contents:',
       resetToDefaults: 'Reset to Defaults',
-      resetConfirmTitle: 'Reset to Defaults?',
+      resetConfirmTitle: 'New Combat?',
       resetConfirmMessage:
-        'This will reset all combatants, turn count, and round to default values. This action cannot be undone.',
-      resetConfirmYes: 'Reset',
+        'Clear all combatants for a new encounter, or restore the default party.',
+      resetConfirmYes: 'Restore Defaults',
+      clearAll: 'Clear All',
       resetConfirmNo: 'Cancel',
     },
     colors: {
@@ -102,13 +128,37 @@ const translations: Record<Locale, TranslationStructure> = {
       pink: 'Pink',
       brown: 'Brown',
     },
+    statBlock: {
+      level: 'Lvl',
+      ac: 'AC',
+      fortitude: 'Fort',
+      reflex: 'Ref',
+      will: 'Will',
+      speed: 'Speed',
+      perception: 'Perc',
+      resistances: 'Resistances',
+      weaknesses: 'Weaknesses',
+      immunities: 'Immunities',
+      traits: 'Traits',
+      attacks: 'Attacks',
+      abilities: 'Abilities',
+      notes: 'Notes',
+    },
+    card: {
+      pc: 'PC',
+      monster: 'Monster',
+      npc: 'NPC',
+      saveParty: 'Save Party',
+      loadParty: 'Load Party',
+      noParty: 'No saved party',
+    },
     helpText: {
       actions: [
         '<icon:tabler:eye-off /> Hidden from player view; ignored during turn advancement',
         '<icon:tabler:eye-closed /> HP bar NOT visible to players',
         '<icon:tabler:eye /> HP bar visible to players',
         '<br />',
-        '<icon:ph:mouse-left-click-fill /> Click button to toggle between <icon:tabler:eye-off /> and <icon:tabler:eye-closed />',
+        '<icon:ph:mouse-left-click-fill /> Click button to cycle: <icon:tabler:eye-off /> → <icon:tabler:eye-closed /> → <icon:tabler:eye />',
         '<icon:ph:mouse-right-click-fill /> Right-click to set <icon:tabler:eye />',
       ],
       hp: [
@@ -151,11 +201,11 @@ const translations: Record<Locale, TranslationStructure> = {
     dm_actions: {
       next: 'Avançar',
       reset: 'Novo combate',
-      resetTooltip: 'Resetar Rodada e Turno para 1',
+      resetTooltip: 'Limpar todos os combatentes para um novo encontro',
       playerView: 'Player View',
       add: 'Adicionar',
       clear: 'Limpar',
-      quantity: 'Qtd',
+      quantity: 'Quantidade',
       onlineMode: 'Modo Online',
       copyPlayerUrl: 'Copiar URL dos Jogadores',
       copiedToClipboard: 'Copiado!',
@@ -171,10 +221,11 @@ const translations: Record<Locale, TranslationStructure> = {
       useTempHP: 'Usar PV Temporário',
       contents: 'Conteúdos:',
       resetToDefaults: 'Restaurar Padrões',
-      resetConfirmTitle: 'Restaurar Padrões?',
+      resetConfirmTitle: 'Novo Combate?',
       resetConfirmMessage:
-        'Isso irá resetar todos os combatentes, contagem de turno e rodada para os valores padrão. Esta ação não pode ser desfeita.',
-      resetConfirmYes: 'Restaurar',
+        'Limpar todos os combatentes para um novo encontro, ou restaurar o grupo padrão.',
+      resetConfirmYes: 'Restaurar Padrões',
+      clearAll: 'Limpar Tudo',
       resetConfirmNo: 'Cancelar',
     },
     colors: {
@@ -185,13 +236,37 @@ const translations: Record<Locale, TranslationStructure> = {
       pink: 'Rosa',
       brown: 'Marrom',
     },
+    statBlock: {
+      level: 'Nv',
+      ac: 'CA',
+      fortitude: 'Fort',
+      reflex: 'Ref',
+      will: 'Vont',
+      speed: 'Vel',
+      perception: 'Percep',
+      resistances: 'Resistências',
+      weaknesses: 'Fraquezas',
+      immunities: 'Imunidades',
+      traits: 'Traços',
+      attacks: 'Ataques',
+      abilities: 'Habilidades',
+      notes: 'Notas',
+    },
+    card: {
+      pc: 'PJ',
+      monster: 'Monstro',
+      npc: 'NPC',
+      saveParty: 'Salvar Grupo',
+      loadParty: 'Carregar Grupo',
+      noParty: 'Sem grupo salvo',
+    },
     helpText: {
       actions: [
         '<icon:tabler:eye-off /> Oculto da visão do jogador; é ignorado durante a passagem de turno',
         '<icon:tabler:eye-closed /> Barra de vida NÃO visível para os jogadores',
         '<icon:tabler:eye /> Barra de vida visível para os jogadores',
         '<br />',
-        '<icon:ph:mouse-left-click-fill /> Clique no botão para alternar entre <icon:tabler:eye-off /> e <icon:tabler:eye-closed />',
+        '<icon:ph:mouse-left-click-fill /> Clique no botão para alternar: <icon:tabler:eye-off /> → <icon:tabler:eye-closed /> → <icon:tabler:eye />',
         '<icon:ph:mouse-right-click-fill /> Clique direito para definir <icon:tabler:eye />',
       ],
       hp: [

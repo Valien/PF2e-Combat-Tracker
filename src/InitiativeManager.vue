@@ -255,6 +255,7 @@ const orderedCombatants = computed(() => {
 function reset() {
   turn.value = 0
   round.value = 1
+  combatants.value = []
 }
 
 /**
@@ -288,8 +289,16 @@ function nextTurn() {
   turn.value = newTurn
 }
 
-function addCombatant(name: string, HP: number, initiative: number, visibility: Visibility): void {
-  combatants.value.push(new Combatant(name, HP, initiative, HP, [], visibility, 0, 0))
+function addCombatant(
+  name: string,
+  HP: number,
+  initiative: number,
+  visibility: Visibility,
+  extras?: Record<string, unknown>,
+): void {
+  combatants.value.push(
+    new Combatant(name, HP, initiative, HP, [], visibility, 0, 0, extras as any),
+  )
 }
 
 function removeCombatant(index: number): void {
@@ -317,6 +326,14 @@ function resetToDefaults(): void {
   round.value = 1
   combatants.value = getDefaultCombatants()
 }
+
+function loadParty(): void {
+  const saved = localStorage.getItem('partyRoster')
+  if (!saved) return
+  combatants.value = deserializeCombatantArray(saved)
+  turn.value = 0
+  round.value = 1
+}
 </script>
 
 <template>
@@ -336,6 +353,8 @@ function resetToDefaults(): void {
     @new-combatant="addCombatant"
     @remove-combatant="removeCombatant"
     @toggle-online-mode="toggleOnlineMode"
+    @save-party="() => {}"
+    @load-party="loadParty"
   />
   <PlayerView v-else :turn="turn" :round="round" :combatants="orderedCombatants" />
 </template>

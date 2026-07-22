@@ -323,8 +323,35 @@ class Combatant {
   }
 
   /**
+   * Heals the combatant to full HP and clears all temporary HP.
+   * Common "reset to full" shortcut for the DM.
+   */
+  public healToMax() {
+    this.currentHP = this.totalHP
+    this.tempHP = 0
+    this.maxTempHP = 0
+  }
+
+  /**
+   * Sets the combatant's maximum HP to the given value.
+   * @param value - The new maximum HP
+   */
+  public setMaxHP(value: number) {
+    this.totalHP = value
+    this.currentHP = value
+  }
+
+  /**
+   * Sets the combatant's initiative score.
+   * @param value - The new initiative value
+   */
+  public setInitiative(value: number) {
+    this.initiative = value
+  }
+
+  /**
    * Changes the visibility level of the combatant
-   * Left-click cycles between None and Half
+   * Left-click cycles: None → Half → Full → None
    * Right-click sets to Full
    * @param setVisible - If true, sets to Full visibility (from right-click)
    */
@@ -333,7 +360,7 @@ class Combatant {
       this.visibility = Visibility.Full
       return
     }
-    this.visibility = (this.visibility + 1) % 2
+    this.visibility = (this.visibility + 1) % 3
   }
 
   /**
