@@ -112,6 +112,20 @@ pnpm run type-check # TypeScript type checking
 
 CI runs `lint → test → type-check → build` on every push/PR.
 
+### Docker (No Node/pnpm Required)
+
+If you don't want to install Node.js or pnpm locally, use Docker:
+
+```bash
+docker compose up --build
+```
+
+Then open **http://localhost:8080/** (DM view) or
+**http://localhost:8080/?view=player** (player view).
+
+To stop: `docker compose down`. Other devices on your network can connect
+using your machine's LAN IP (e.g. `http://192.168.1.50:8080/`).
+
 ## Usage
 
 ### DM View (Default)

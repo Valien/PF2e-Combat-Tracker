@@ -1,0 +1,9 @@
+services:
+  initiative-tracker:
+    build: .
+    ports:
+      - "8080:80"
+    # To allow other devices on your network (tablet, phone) to connect,
+    # Docker already binds 0.0.0.0 by default — use your LAN IP:
+    #   http://192.168.x.x:8080/
+    restart: unless-stopped
