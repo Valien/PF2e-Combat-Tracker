@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import CombatantCard from './CombatantCard.vue'
 import InitiativeStrip from './InitiativeStrip.vue'
+import EndCombatModal from './EndCombatModal.vue'
 import Settings from './Settings.vue'
 import { Combatant, Visibility } from './functions.ts'
 import { Icon } from '@iconify/vue'
@@ -30,6 +31,7 @@ const conditions = computed(() => useConditions(lang.value))
 
 const emit = defineEmits<{
   (e: 'nextTurn'): void
+  (e: 'prevTurn'): void
   (e: 'reset'): void
   (e: 'resetToDefaults'): void
   (
@@ -44,6 +46,7 @@ const emit = defineEmits<{
   (e: 'toggleOnlineMode', value: boolean): void
   (e: 'saveParty'): void
   (e: 'loadParty'): void
+  (e: 'endCombat'): void
 }>()
 
 const props = defineProps<{
@@ -56,6 +59,7 @@ const props = defineProps<{
 
 const showCopiedMessage = ref(false)
 const showResetConfirm = ref(false)
+const showEndCombatModal = ref(false)
 const isSettingsOpen = ref(false)
 
 const newName = ref('')
@@ -67,6 +71,20 @@ const isNewCombatantPopoverOpen = ref(false)
 
 const enabledContentSources = useEnabledContentSources()
 const monsterList = computed<Monster[]>(() => getEnabledMonsters(enabledContentSources.value))
+
+// Scroll the active card into view when the turn changes so the DM doesn't
+// have to manually scroll through a long combatant list.
+const cardGrid = ref<HTMLElement>()
+watch(
+  () => props.turn,
+  async () => {
+    await nextTick()
+    cardGrid.value?.querySelector('[data-active="true"]')?.scrollIntoView({
+      block: 'nearest',
+      behavior: 'smooth',
+    })
+  },
+)
 
 watch(newName, (selectedName) => {
   const monster = monsterList.value.find((m) => m.name === selectedName)
@@ -152,9 +170,7 @@ const hasPartyRoster = computed(() => {
 })
 
 function saveParty() {
-  const pcs = props.combatants.filter((c) => c.visibility === 2 || c.type === 'pc')
-  const serialized = pcs.map((c) => JSON.stringify(c))
-  localStorage.setItem('partyRoster', JSON.stringify(serialized))
+  emit('saveParty')
 }
 
 function loadParty() {
@@ -200,7 +216,13 @@ async function copyPlayerUrl(): Promise<void> {
 <template>
   <div class="space-y-3">
     <!-- Initiative Strip -->
-    <InitiativeStrip :combatants="combatants" :turn="turn" />
+    <InitiativeStrip
+      :combatants="combatants"
+      :turn="turn"
+      show-nav
+      @prev="$emit('prevTurn')"
+      @next="$emit('nextTurn')"
+    />
 
     <!-- Action Bar -->
     <div class="flex flex-wrap items-center gap-2">
@@ -215,6 +237,14 @@ async function copyPlayerUrl(): Promise<void> {
 
       <button class="btn btn-error btn-sm" @click="requestReset">
         <Icon icon="tabler:refresh" height="18" />{{ t.dm_actions.reset }}
+      </button>
+
+      <button
+        class="btn btn-warning btn-sm"
+        :disabled="!combatants.length"
+        @click="showEndCombatModal = true"
+      >
+        <Icon icon="tabler:flag" height="18" />{{ t.endCombat.title }}
       </button>
 
       <a v-if="!isOnlineMode" class="btn btn-neutral btn-sm" href="?view=player">
@@ -315,12 +345,17 @@ async function copyPlayerUrl(): Promise<void> {
     </div>
 
     <!-- Card Grid -->
-    <div v-if="combatants.length" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+    <div
+      v-if="combatants.length"
+      ref="cardGrid"
+      class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3"
+    >
       <CombatantCard
         v-for="(combatant, i) in combatants"
         :key="`${combatant.name}-${i}`"
         :combatant="combatant"
         :is-active="i === turn"
+        :data-active="i === turn ? 'true' : 'false'"
         @remove="removeCombatant(i)"
       />
     </div>
@@ -374,6 +409,14 @@ async function copyPlayerUrl(): Promise<void> {
       @toggle-online-mode="(v) => $emit('toggleOnlineMode', v)"
       @request-reset="requestReset"
       @close="isSettingsOpen = false"
+    />
+
+    <!-- End Combat / XP Summary Modal -->
+    <EndCombatModal
+      :is-open="showEndCombatModal"
+      :combatants="combatants"
+      @close="showEndCombatModal = false"
+      @end-combat="$emit('endCombat')"
     />
   </div>
 </template>

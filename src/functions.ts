@@ -167,6 +167,14 @@ class Combatant {
   aonUrl?: string
   notes?: string
 
+  // --- Schema v3 fields (action/reaction tracking for DM quick-tally) ---
+  // PF2e RAW: each creature gets 3 actions + 1 reaction per turn, regained
+  // at the start of its own turn. `actionsUsed` clamps at the standard 3;
+  // some effects (Haste, Quickened) grant extra — those callers can pass a
+  // higher max to `useAction`. `reactionUsed` is a simple boolean toggle.
+  actionsUsed: number
+  reactionUsed: boolean
+
   constructor(
     name: string,
     totalHP: number,
@@ -195,6 +203,8 @@ class Combatant {
       abilities?: MonsterAbility[]
       aonUrl?: string
       notes?: string
+      actionsUsed?: number
+      reactionUsed?: boolean
     } = {},
   ) {
     this.name = name
@@ -225,6 +235,10 @@ class Combatant {
     this.abilities = extras.abilities
     this.aonUrl = extras.aonUrl
     this.notes = extras.notes
+
+    // Schema v3 fields
+    this.actionsUsed = extras.actionsUsed ?? 0
+    this.reactionUsed = extras.reactionUsed ?? false
   }
 
   /**
@@ -361,6 +375,48 @@ class Combatant {
       return
     }
     this.visibility = (this.visibility + 1) % 3
+  }
+
+  /**
+   * Standard PF2e action count per turn (3 actions + 1 reaction).
+   * Effects like Haste can grant a 4th action; callers pass a higher max.
+   */
+  public static readonly MAX_ACTIONS_PER_TURN = 3
+
+  /**
+   * Marks one action as spent this turn.
+   * Clamps at `max` (default 3 per PF2e RAW) so a stray click can't un-spend
+   * a 4th action — the DM must explicitly unuse.
+   * @param max - Maximum actions allowed this turn (default: 3)
+   */
+  public useAction(max: number = Combatant.MAX_ACTIONS_PER_TURN) {
+    if (this.actionsUsed < max) this.actionsUsed++
+  }
+
+  /**
+   * Un-spends one action (corrects a mis-click).
+   * Clamps at 0; never goes negative.
+   */
+  public unuseAction() {
+    if (this.actionsUsed > 0) this.actionsUsed--
+  }
+
+  /**
+   * Toggles the per-turn reaction flag.
+   * Reactions in PF2e are single-use per round; `resetActions()` clears it.
+   */
+  public toggleReaction() {
+    this.reactionUsed = !this.reactionUsed
+  }
+
+  /**
+   * Clears action/reaction tracking. Called when the creature regains
+   * actions at the start of its own turn (typically via `nextTurn`/`prevTurn`
+   * in `InitiativeManager`), and on `endCombat` / `reset`.
+   */
+  public resetActions() {
+    this.actionsUsed = 0
+    this.reactionUsed = false
   }
 
   /**

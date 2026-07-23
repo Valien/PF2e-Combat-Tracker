@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Combatant, Visibility } from './functions.ts'
+import { Icon } from '@iconify/vue'
 import { useTranslations } from './lang.ts'
 
 const { t } = useTranslations()
@@ -8,6 +9,12 @@ defineProps<{
   combatants: Combatant[]
   turn: number
   isReadOnly?: boolean
+  showNav?: boolean
+}>()
+
+const emit = defineEmits<{
+  (e: 'prev'): void
+  (e: 'next'): void
 }>()
 </script>
 
@@ -15,7 +22,7 @@ defineProps<{
   <div
     class="flex items-center gap-2 overflow-x-auto pb-2 px-1 sticky top-0 z-10 bg-base-200/95 backdrop-blur rounded-lg"
   >
-    <div class="flex items-center gap-1 whitespace-nowrap">
+    <div class="flex items-center gap-1 whitespace-nowrap flex-1">
       <span class="text-sm font-semibold text-base-content/60 px-2">{{ t.table.round }}</span>
       <template v-for="(combatant, i) in combatants" :key="i">
         <div
@@ -54,6 +61,26 @@ defineProps<{
           class="text-base-content/30 shrink-0"
         />
       </template>
+    </div>
+    <!-- Prev / Next nav (DM view only) -->
+    <div
+      v-if="showNav"
+      class="flex items-center gap-1 shrink-0 pl-2 border-l border-base-content/20"
+    >
+      <button
+        class="btn btn-ghost btn-xs btn-circle"
+        :aria-label="t.nav.prev"
+        @click="emit('prev')"
+      >
+        <Icon icon="tabler:player-skip-back" height="18" />
+      </button>
+      <button
+        class="btn btn-ghost btn-xs btn-circle"
+        :aria-label="t.nav.next"
+        @click="emit('next')"
+      >
+        <Icon icon="tabler:player-skip-forward" height="18" />
+      </button>
     </div>
   </div>
 </template>

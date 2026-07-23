@@ -8,19 +8,19 @@ import { getDefaultEnabledSources } from '../db.ts'
 // Module-singleton refs are created once and shared across all callers.
 
 const tempHPEnabled = useStorage<boolean>('useTempHP', true)
-const hpValue = useStorage<number>('HPValue', 1)
 const enabledContentSources = useStorage<string[]>(
   'enabledContentSources',
   getDefaultEnabledSources(),
 )
 const theme = useStorage<string>('theme', 'dracula')
+const partyLevel = useStorage<number>('partyLevel', 1)
 
 export function useSettings() {
   return {
     useTempHP: tempHPEnabled,
-    HPValue: hpValue,
     enabledContentSources,
     theme,
+    partyLevel,
   }
 }
 
@@ -36,6 +36,6 @@ export function useTempHP() {
   return tempHPEnabled
 }
 
-export function useHPValue() {
-  return hpValue
+export function usePartyLevel() {
+  return partyLevel
 }

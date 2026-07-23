@@ -259,9 +259,10 @@ function reset() {
 }
 
 /**
- * Advances to the next turn, skipping hidden combatants
- * Increments round when cycling back to the top of initiative order
- * Does nothing if all combatants are hidden
+ * Advances to the next turn, skipping hidden combatants.
+ * Increments round when cycling back to the top of initiative order.
+ * Regains actions (3 actions + 1 reaction) for the new active combatant per
+ * PF2e RAW. Does nothing if all combatants are hidden.
  */
 function nextTurn() {
   if (
@@ -287,6 +288,45 @@ function nextTurn() {
   )
 
   turn.value = newTurn
+  // Regain actions at the start of your turn (PF2e RAW).
+  orderedCombatants.value[newTurn]?.resetActions()
+}
+
+/**
+ * Moves to the previous turn (reverse direction), skipping hidden combatants.
+ * Decrements round when cycling back past the top of initiative order, but
+ * never drops below round 1. Regains actions for the new active combatant.
+ * Useful for correcting mis-clicks on the Next button.
+ */
+function prevTurn() {
+  if (
+    orderedCombatants.value.every(
+      (combatant: Combatant) => combatant.visibility === Visibility.None,
+    )
+  ) {
+    return
+  }
+
+  let newTurn: number = turn.value
+
+  do {
+    newTurn--
+
+    if (newTurn < 0) {
+      newTurn = orderedCombatants.value.length - 1
+      // Clamp at round 1 — PF2e has no "previous round" semantics; the DM
+      // can always re-advance forward. Don't go below 1 to avoid negative
+      // round state that would confuse the UI.
+      if (round.value > 1) round.value--
+    }
+  } while (
+    newTurn >= 0 &&
+    newTurn <= orderedCombatants.value.length - 1 &&
+    orderedCombatants.value[newTurn].visibility === Visibility.None
+  )
+
+  turn.value = newTurn
+  orderedCombatants.value[newTurn]?.resetActions()
 }
 
 function addCombatant(
@@ -314,6 +354,12 @@ function removeCombatant(index: number): void {
     turn.value -= 1
   } else if (index == combatants.value.length) {
     nextTurn()
+  } else if (index === turn.value) {
+    // The active combatant was removed mid-turn and it wasn't the last in
+    // initiative order — the creature now at this index becomes active.
+    // Reset its actions so it starts fresh (doesn't inherit the removed
+    // creature's used actions / reaction).
+    orderedCombatants.value[turn.value]?.resetActions()
   }
 }
 
@@ -334,6 +380,40 @@ function loadParty(): void {
   turn.value = 0
   round.value = 1
 }
+
+/**
+ * Persists PC combatants (visibility=Full or type=pc) to localStorage as
+ * the party roster. Lifted here from DMView so the End Combat flow can
+ * auto-backup the party before clearing monsters.
+ */
+function saveParty(): void {
+  const pcs = combatants.value.filter((c: Combatant) => c.visibility === 2 || c.type === 'pc')
+  const serialized = pcs.map((c: Combatant) => JSON.stringify(c))
+  localStorage.setItem('partyRoster', JSON.stringify(serialized))
+}
+
+/**
+ * Ends combat and prepares for the next encounter:
+ * - Removes all monsters and NPCs (keeps PCs)
+ * - Heals surviving PCs to full and clears their conditions
+ * - Auto-saves the party roster as a backup
+ * - Resets turn to 0 and round to 1
+ * Called from the End Combat modal's "New Encounter" confirmation.
+ */
+function endCombat(): void {
+  const pcs = combatants.value
+    .filter((c: Combatant) => c.type === 'pc')
+    .map((c: Combatant) => {
+      c.healToMax()
+      c.conditions = []
+      c.resetActions()
+      return c
+    })
+  combatants.value = pcs
+  saveParty()
+  turn.value = 0
+  round.value = 1
+}
 </script>
 
 <template>
@@ -348,13 +428,15 @@ function loadParty(): void {
     :is-online-mode="isOnlineMode"
     :session-id="sessionId"
     @next-turn="nextTurn"
+    @prev-turn="prevTurn"
     @reset="reset"
     @reset-to-defaults="resetToDefaults"
     @new-combatant="addCombatant"
     @remove-combatant="removeCombatant"
     @toggle-online-mode="toggleOnlineMode"
-    @save-party="() => {}"
+    @save-party="saveParty"
     @load-party="loadParty"
+    @end-combat="endCombat"
   />
   <PlayerView v-else :turn="turn" :round="round" :combatants="orderedCombatants" />
 </template>

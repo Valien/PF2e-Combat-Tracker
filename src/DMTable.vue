@@ -14,7 +14,7 @@ import {
 } from 'reka-ui'
 import { useConditions } from './db.ts'
 import { useTranslations } from './lang.ts'
-import { useTempHP, useHPValue } from './composables/useSettings'
+import { useTempHP } from './composables/useSettings'
 import HelpText from './HelpText.vue'
 import HelpTextLine from './HelpTextLine.vue'
 
@@ -33,7 +33,7 @@ const emit = defineEmits<{
   (e: 'removeCombatant', index: number): void
 }>()
 
-const HPValue = useHPValue()
+const HPValue = ref(5)
 const isConditionPopoverOpen = ref<boolean[]>(props.combatants.map(() => false))
 const newConditionName = ref<string>('')
 const newConditionValue = ref<number>(1)

@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { Combatant, Visibility, colorIsDark } from './functions.ts'
 import { Icon } from '@iconify/vue'
 import { useTranslations } from './lang.ts'
-import { useTempHP, useHPValue } from './composables/useSettings'
+import { useTempHP } from './composables/useSettings'
 import { useConditions } from './db.ts'
 import {
   Label,
@@ -18,7 +18,10 @@ import {
 
 const { t, lang } = useTranslations()
 const tempHPEnabled = useTempHP()
-const hpValue = useHPValue()
+// Per-card HP delta input. Previously this was a module-singleton ref in
+// useSettings, which caused editing it on one card to update every card.
+// Local ref = each card tracks its own damage/heal amount independently.
+const hpValue = ref(5)
 const conditions = computed(() => useConditions(lang.value))
 
 const props = withDefaults(
@@ -71,6 +74,14 @@ function addCondition() {
 function clearCondition() {
   newConditionName.value = ''
   newConditionValue.value = 1
+}
+
+// Set the combatant's used-action count to `target` by repeatedly calling
+// useAction/unuseAction (which clamp internally). Lets the DM click any pip
+// to jump to that count, or right-click to clear down to the previous pip.
+function setActions(target: number) {
+  while (props.combatant.actionsUsed < target) props.combatant.useAction()
+  while (props.combatant.actionsUsed > target) props.combatant.unuseAction()
 }
 
 function getConditionTooltip(conditionName: string): string {
@@ -238,6 +249,48 @@ const hasStatBlock = computed(
             <Icon icon="tabler:shield-plus" height="16" />
           </button>
         </div>
+      </div>
+
+      <!-- Action / Reaction pips (DM only) -->
+      <div v-if="!isReadOnly" class="flex items-center gap-1 min-h-8">
+        <Icon icon="tabler:swords" height="14" class="text-base-content/40 shrink-0" />
+        <button
+          v-for="i in 3"
+          :key="`act-${i}`"
+          class="btn btn-ghost btn-xs px-1"
+          :aria-label="t.card.actions"
+          :title="`${t.card.actions} ${i}`"
+          @click="setActions(i)"
+          @contextmenu.prevent="setActions(i - 1)"
+        >
+          <Icon
+            :icon="i <= combatant.actionsUsed ? 'tabler:circle-filled' : 'tabler:circle'"
+            height="16"
+            :class="i <= combatant.actionsUsed ? 'text-accent' : 'text-base-content/30'"
+          />
+        </button>
+        <div class="w-px h-5 bg-base-content/20 mx-1"></div>
+        <Icon icon="tabler:arrows-exchange" height="14" class="text-base-content/40 shrink-0" />
+        <button
+          class="btn btn-ghost btn-xs px-1"
+          :aria-label="t.card.reaction"
+          :title="t.card.reaction"
+          @click="combatant.toggleReaction()"
+        >
+          <Icon
+            :icon="combatant.reactionUsed ? 'tabler:circle-filled' : 'tabler:circle'"
+            height="16"
+            :class="combatant.reactionUsed ? 'text-warning' : 'text-base-content/30'"
+          />
+        </button>
+        <button
+          class="btn btn-ghost btn-xs px-1 ml-1"
+          :aria-label="t.card.resetActions"
+          :title="t.card.resetActions"
+          @click="combatant.resetActions()"
+        >
+          <Icon icon="tabler:rotate" height="14" class="text-base-content/40" />
+        </button>
       </div>
 
       <!-- Conditions -->

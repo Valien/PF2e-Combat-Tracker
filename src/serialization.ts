@@ -8,12 +8,15 @@ import { useStorage } from '@vueuse/core'
 //
 // v1: baseline (pre-rich-fields). Combatant had only name/HP/init/conditions/
 //     visibility/tempHP/maxTempHP. Condition had only name/value/color.
-// v2: Combatant gains type/level/ac/perception/saves/speed/resistances/
-//     weaknesses/immunities/traits/family/source/attacks/abilities/aonUrl/
-//     notes. Condition gains duration/expiresOn/persistentDamage/description.
+// v2: Combatant gains type/level/ac/saves/speed/resistances/weaknesses/
+//     immunities/traits/family/source/attacks/abilities/aonUrl/notes.
+//     Condition gains duration/expiresOn/persistentDamage/description.
 //     All new fields default to undefined/empty so v1 state rehydrates without
 //     loss and gains sensible defaults on first access.
-export const CURRENT_SCHEMA_VERSION = 2
+// v3: Combatant gains actionsUsed/reactionUsed (per-turn action tracking for
+//     the DM quick-tally buttons). Defaults to 0/false so v1/v2 state
+//     rehydrates with full actions available on the next turn.
+export const CURRENT_SCHEMA_VERSION = 3
 
 // Storage key holding the version number of the persisted combat state.
 export const SCHEMA_VERSION_KEY = 'schemaVersion'
@@ -53,6 +56,15 @@ const migrations: Record<number, MigrationFn> = {
       ...(raw.aonUrl === undefined ? {} : { aonUrl: raw.aonUrl }),
       ...(raw.notes === undefined ? {} : { notes: raw.notes }),
       conditions: (raw.conditions || []).map(upgradeCondition),
+    }
+  },
+  3: (raw) => {
+    // v2 -> v3: add action/reaction tracking fields with safe defaults.
+    // Conditions are unaffected by this migration (no Condition schema change).
+    return {
+      ...raw,
+      actionsUsed: raw.actionsUsed ?? 0,
+      reactionUsed: raw.reactionUsed ?? false,
     }
   },
 }
@@ -114,6 +126,8 @@ export function deserializeCombatant(combatant: any): Combatant {
       abilities: combatant.abilities,
       aonUrl: combatant.aonUrl,
       notes: combatant.notes,
+      actionsUsed: combatant.actionsUsed,
+      reactionUsed: combatant.reactionUsed,
     },
   )
 }

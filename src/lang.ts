@@ -72,6 +72,30 @@ type TranslationStructure = {
     saveParty: string
     loadParty: string
     noParty: string
+    actions: string
+    reaction: string
+    resetActions: string
+  }
+  endCombat: {
+    title: string
+    description: string
+    partyLevel: string
+    partyLevelHint: string
+    defeated: string
+    xp: string
+    totalXp: string
+    newEncounter: string
+    close: string
+    noMonsters: string
+    severityTrivial: string
+    severityLow: string
+    severityModerate: string
+    severitySevere: string
+    severityExtreme: string
+  }
+  nav: {
+    prev: string
+    next: string
   }
   helpText: {
     actions: string[]
@@ -151,6 +175,30 @@ const translations: Record<Locale, TranslationStructure> = {
       saveParty: 'Save Party',
       loadParty: 'Load Party',
       noParty: 'No saved party',
+      actions: 'Actions',
+      reaction: 'Reaction',
+      resetActions: 'Reset Actions',
+    },
+    endCombat: {
+      title: 'End Combat',
+      description: 'Review defeated monsters and award XP before starting a new encounter.',
+      partyLevel: 'Party Level',
+      partyLevelHint: 'Used to calculate XP per monster',
+      defeated: 'Defeated monsters',
+      xp: 'XP',
+      totalXp: 'Total XP',
+      newEncounter: 'New Encounter',
+      close: 'Close',
+      noMonsters: 'No monsters in this encounter',
+      severityTrivial: 'Trivial',
+      severityLow: 'Low',
+      severityModerate: 'Moderate',
+      severitySevere: 'Severe',
+      severityExtreme: 'Extreme',
+    },
+    nav: {
+      prev: 'Previous',
+      next: 'Next',
     },
     helpText: {
       actions: [
@@ -259,6 +307,30 @@ const translations: Record<Locale, TranslationStructure> = {
       saveParty: 'Salvar Grupo',
       loadParty: 'Carregar Grupo',
       noParty: 'Sem grupo salvo',
+      actions: 'Ações',
+      reaction: 'Reação',
+      resetActions: 'Resetar Ações',
+    },
+    endCombat: {
+      title: 'Encerrar Combate',
+      description: 'Revise os monstros derrotados e conceda XP antes de iniciar um novo encontro.',
+      partyLevel: 'Nível do Grupo',
+      partyLevelHint: 'Usado para calcular XP por monstro',
+      defeated: 'Monstros derrotados',
+      xp: 'XP',
+      totalXp: 'XP Total',
+      newEncounter: 'Novo Encontro',
+      close: 'Fechar',
+      noMonsters: 'Sem monstros neste encontro',
+      severityTrivial: 'Trivial',
+      severityLow: 'Baixo',
+      severityModerate: 'Moderado',
+      severitySevere: 'Severo',
+      severityExtreme: 'Extremo',
+    },
+    nav: {
+      prev: 'Anterior',
+      next: 'Próximo',
     },
     helpText: {
       actions: [

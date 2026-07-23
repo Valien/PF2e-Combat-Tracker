@@ -2,8 +2,9 @@
 import { computed } from 'vue'
 import { useTranslations } from './lang.ts'
 import { getContentSources } from './db.ts'
-import { useTempHP, useEnabledContentSources } from './composables/useSettings'
+import { useTempHP, useEnabledContentSources, usePartyLevel } from './composables/useSettings'
 import { Icon } from '@iconify/vue'
+import { NumberFieldInput, NumberFieldRoot } from 'reka-ui'
 
 const { t } = useTranslations()
 
@@ -23,6 +24,7 @@ const emit = defineEmits<{
 // Settings stored in localStorage (module-singleton refs)
 const tempHPEnabled = useTempHP()
 const enabledContentSources = useEnabledContentSources()
+const partyLevel = usePartyLevel()
 
 // Get available content sources
 const availableContentSources = computed(() => {
@@ -79,6 +81,19 @@ function requestReset() {
             <input v-model="tempHPEnabled" type="checkbox" class="toggle" />
             <span class="label-text">{{ t.options.useTempHP }}</span>
           </label>
+        </div>
+
+        <!-- Party Level (for XP calculation at end of combat) -->
+        <div class="flex items-center justify-between">
+          <label for="settingsPartyLevel" class="label cursor-pointer gap-2">
+            <span class="label-text flex items-center gap-1">
+              <Icon icon="tabler:users" height="16" />
+              {{ t.endCombat.partyLevel }}
+            </span>
+          </label>
+          <NumberFieldRoot v-model="partyLevel" :min="1">
+            <NumberFieldInput id="settingsPartyLevel" class="input input-sm w-20" />
+          </NumberFieldRoot>
         </div>
 
         <!-- Content Sources Submenu -->

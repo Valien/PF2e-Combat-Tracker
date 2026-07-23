@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { Combatant, Condition, Visibility, colorIsDark } from './functions'
 import { migrateCombatants, deserializeCombatant, CURRENT_SCHEMA_VERSION } from './serialization'
+import { computeMonsterXP } from './xp'
 
 describe('Condition', () => {
   it('should create a condition with default value of 1', () => {
@@ -419,5 +420,235 @@ describe('Schema migration (v1 -> v2)', () => {
     expect(migrated[0].type).toBe('monster')
     expect(migrated[0].level).toBe(1)
     expect(migrated[0].resistances[0].type).toBe('fire')
+  })
+})
+
+describe('Combatant - action/reaction tracking', () => {
+  it('should initialize with 0 actions used and reaction not used', () => {
+    const combatant = new Combatant('Goblin', 6, 2)
+    expect(combatant.actionsUsed).toBe(0)
+    expect(combatant.reactionUsed).toBe(false)
+  })
+
+  it('should increment actionsUsed via useAction()', () => {
+    const combatant = new Combatant('Goblin', 6, 2)
+    combatant.useAction()
+    expect(combatant.actionsUsed).toBe(1)
+    combatant.useAction()
+    expect(combatant.actionsUsed).toBe(2)
+    combatant.useAction()
+    expect(combatant.actionsUsed).toBe(3)
+  })
+
+  it('should clamp actionsUsed at max (default 3 per PF2e RAW)', () => {
+    const combatant = new Combatant('Goblin', 6, 2)
+    combatant.useAction()
+    combatant.useAction()
+    combatant.useAction()
+    combatant.useAction() // 4th click should not go past 3
+    expect(combatant.actionsUsed).toBe(3)
+  })
+
+  it('should allow a custom max for effects like Haste (4 actions)', () => {
+    const combatant = new Combatant('Hasted Fighter', 25, 10)
+    combatant.useAction(4)
+    combatant.useAction(4)
+    combatant.useAction(4)
+    combatant.useAction(4)
+    expect(combatant.actionsUsed).toBe(4)
+    combatant.useAction(4) // 5th should clamp at 4
+    expect(combatant.actionsUsed).toBe(4)
+  })
+
+  it('should decrement actionsUsed via unuseAction()', () => {
+    const combatant = new Combatant('Goblin', 6, 2)
+    combatant.useAction()
+    combatant.useAction()
+    expect(combatant.actionsUsed).toBe(2)
+    combatant.unuseAction()
+    expect(combatant.actionsUsed).toBe(1)
+  })
+
+  it('should not go below 0 actionsUsed via unuseAction()', () => {
+    const combatant = new Combatant('Goblin', 6, 2)
+    combatant.unuseAction()
+    expect(combatant.actionsUsed).toBe(0)
+  })
+
+  it('should toggle reaction via toggleReaction()', () => {
+    const combatant = new Combatant('Goblin', 6, 2)
+    expect(combatant.reactionUsed).toBe(false)
+    combatant.toggleReaction()
+    expect(combatant.reactionUsed).toBe(true)
+    combatant.toggleReaction()
+    expect(combatant.reactionUsed).toBe(false)
+  })
+
+  it('should reset actions and reaction via resetActions()', () => {
+    const combatant = new Combatant('Goblin', 6, 2)
+    combatant.useAction()
+    combatant.useAction()
+    combatant.toggleReaction()
+    expect(combatant.actionsUsed).toBe(2)
+    expect(combatant.reactionUsed).toBe(true)
+    combatant.resetActions()
+    expect(combatant.actionsUsed).toBe(0)
+    expect(combatant.reactionUsed).toBe(false)
+  })
+
+  it('should accept actionsUsed/reactionUsed via constructor extras', () => {
+    const combatant = new Combatant('Goblin', 6, 2, 6, [], Visibility.Half, 0, 0, {
+      type: 'monster',
+      actionsUsed: 2,
+      reactionUsed: true,
+    })
+    expect(combatant.actionsUsed).toBe(2)
+    expect(combatant.reactionUsed).toBe(true)
+  })
+})
+
+describe('Schema migration (v2 -> v3)', () => {
+  it('should add v3 action fields with defaults to v2 combatants', () => {
+    const v2Combatant = {
+      name: 'Goblin',
+      totalHP: 6,
+      initiative: 2,
+      currentHP: 6,
+      conditions: [],
+      visibility: 1,
+      tempHP: 0,
+      maxTempHP: 0,
+      type: 'monster',
+      level: 1,
+      ac: 16,
+    }
+    const migrated = migrateCombatants(2, [v2Combatant])
+    expect(migrated[0].actionsUsed).toBe(0)
+    expect(migrated[0].reactionUsed).toBe(false)
+    // v2 fields should be preserved
+    expect(migrated[0].type).toBe('monster')
+    expect(migrated[0].level).toBe(1)
+  })
+
+  it('should preserve existing v3 fields if already present', () => {
+    const v3Combatant = {
+      name: 'Boss',
+      totalHP: 50,
+      initiative: 5,
+      currentHP: 30,
+      conditions: [],
+      visibility: 2,
+      tempHP: 0,
+      maxTempHP: 0,
+      type: 'monster',
+      level: 3,
+      actionsUsed: 2,
+      reactionUsed: true,
+    }
+    // Stored as v2 by mistake, but v3 fields are present -> migration
+    // should preserve them.
+    const migrated = migrateCombatants(2, [v3Combatant])
+    expect(migrated[0].actionsUsed).toBe(2)
+    expect(migrated[0].reactionUsed).toBe(true)
+  })
+
+  it('should deserialize v3 combatant with action fields into class instance', () => {
+    const v3Combatant = {
+      name: 'Goblin',
+      totalHP: 6,
+      initiative: 2,
+      currentHP: 6,
+      conditions: [],
+      visibility: 1,
+      tempHP: 0,
+      maxTempHP: 0,
+      type: 'monster',
+      level: 1,
+      actionsUsed: 1,
+      reactionUsed: true,
+    }
+    const migrated = migrateCombatants(3, [v3Combatant])
+    const combatant = deserializeCombatant(migrated[0])
+    expect(combatant).toBeInstanceOf(Combatant)
+    expect(combatant.actionsUsed).toBe(1)
+    expect(combatant.reactionUsed).toBe(true)
+  })
+
+  it('should be a no-op when stored version equals current (v3)', () => {
+    const v3Combatant = {
+      name: 'X',
+      totalHP: 10,
+      initiative: 1,
+      currentHP: 10,
+      conditions: [],
+      visibility: 1,
+      tempHP: 0,
+      maxTempHP: 0,
+      type: 'pc',
+      actionsUsed: 0,
+      reactionUsed: false,
+    }
+    const migrated = migrateCombatants(CURRENT_SCHEMA_VERSION, [v3Combatant])
+    expect(migrated[0]).toEqual(v3Combatant)
+  })
+
+  it('should migrate v1 all the way to v3 in one pass', () => {
+    const v1Combatant = {
+      name: 'Amiri',
+      totalHP: 22,
+      initiative: 4,
+      currentHP: 22,
+      conditions: [{ name: 'Frightened', value: 2 }],
+      visibility: 2,
+      tempHP: 0,
+      maxTempHP: 0,
+    }
+    const migrated = migrateCombatants(1, [v1Combatant])
+    // v2 fields
+    expect(migrated[0].type).toBe('pc')
+    // v3 fields
+    expect(migrated[0].actionsUsed).toBe(0)
+    expect(migrated[0].reactionUsed).toBe(false)
+    // Condition got v2 upgrade
+    expect(migrated[0].conditions[0].duration).toBeNull()
+  })
+})
+
+describe('computeMonsterXP (PF2e XP table)', () => {
+  it('should return 40 XP for a monster at party level', () => {
+    expect(computeMonsterXP(5, 5)).toBe(40)
+  })
+
+  it('should return 10 XP for a monster 4+ levels below party', () => {
+    expect(computeMonsterXP(1, 5)).toBe(10)
+    expect(computeMonsterXP(0, 5)).toBe(10)
+  })
+
+  it('should return 160 XP for a monster 4+ levels above party', () => {
+    expect(computeMonsterXP(9, 5)).toBe(160)
+    expect(computeMonsterXP(15, 5)).toBe(160)
+  })
+
+  it('should handle -3 delta (15 XP)', () => {
+    expect(computeMonsterXP(2, 5)).toBe(15) // delta -3
+  })
+
+  it('should handle specific delta values from the table', () => {
+    expect(computeMonsterXP(3, 5)).toBe(20) // -2
+    expect(computeMonsterXP(4, 5)).toBe(30) // -1
+    expect(computeMonsterXP(5, 5)).toBe(40) // 0
+    expect(computeMonsterXP(6, 5)).toBe(60) // +1
+    expect(computeMonsterXP(7, 5)).toBe(80) // +2
+    expect(computeMonsterXP(8, 5)).toBe(120) // +3
+  })
+
+  it('should return 0 XP for monsters without a level', () => {
+    expect(computeMonsterXP(undefined, 5)).toBe(0)
+    expect(computeMonsterXP(undefined, 1)).toBe(0)
+  })
+
+  it('should default partyLevel to 1', () => {
+    expect(computeMonsterXP(1)).toBe(40) // 1 - 1 = 0 -> 40 XP
+    expect(computeMonsterXP(5)).toBe(160) // 5 - 1 = 4 -> 160 XP
   })
 })
