@@ -9,15 +9,21 @@ import { Label, NumberFieldRoot, NumberFieldInput } from 'reka-ui'
 
 const { t } = useTranslations()
 
-defineProps<{
+const props = defineProps<{
   combatants: Combatant[]
+  partyRosters: Record<string, any[]>
+  activePartyName: string
 }>()
 
 const emit = defineEmits<{
   (e: 'close'): void
   (e: 'newPc', name: string, HP: number, initiative: number, extras?: Record<string, unknown>): void
   (e: 'saveParty'): void
+  (e: 'savePartyAs', name: string): void
   (e: 'loadParty'): void
+  (e: 'loadPartyByName', name: string): void
+  (e: 'renameParty', oldName: string, newName: string): void
+  (e: 'deleteParty', name: string): void
   (e: 'removeFromRoster', name: string): void
 }>()
 
@@ -81,8 +87,6 @@ function handleImport(): void {
 
   try {
     const parsed = parsePathbuilderExport(text)
-    // Build the extras bag from the parsed combatant (excluding name/HP/initiative
-    // which go as positional args to newCombatant)
     const extras: Record<string, unknown> = {
       type: 'pc',
       level: parsed.level,
@@ -125,31 +129,36 @@ function handleFileUpload(event: Event): void {
   reader.readAsText(file)
 }
 
-// --- Saved roster ---
-interface RosterEntry {
-  name: string
-  level?: number
-  totalHP: number
-  ac?: number
-}
+// --- Saved parties (multiple) ---
+const partyNames = computed<string[]>(() => Object.keys(props.partyRosters || {}))
 
-const savedRoster = computed<RosterEntry[]>(() => {
-  try {
-    const raw = localStorage.getItem('partyRoster')
-    if (!raw) return []
-    const parsed = JSON.parse(raw)
-    // Handle both the current correct format (array of objects) and the
-    // legacy double-stringified format (array of JSON strings).
-    return (Array.isArray(parsed) ? parsed : []).map((item: unknown) =>
-      typeof item === 'string' ? JSON.parse(item) : item,
-    )
-  } catch {
-    return []
-  }
+// Active party's roster (for display in the "Active Party Members" section)
+const activeRoster = computed<any[]>(() => {
+  const name = props.activePartyName
+  if (!name) return []
+  const roster = props.partyRosters?.[name]
+  if (!roster) return []
+  return (Array.isArray(roster) ? roster : []).map((item: unknown) =>
+    typeof item === 'string' ? JSON.parse(item) : item,
+  )
 })
 
-function removeFromRoster(name: string): void {
-  emit('removeFromRoster', name)
+function handleSavePartyAs(): void {
+  const name = window.prompt(t.value.party.saveAsPrompt, t.value.party.defaultPartyName)
+  if (name && name.trim()) emit('savePartyAs', name.trim())
+}
+
+function handleRename(name: string): void {
+  const newName = window.prompt(t.value.party.renamePrompt, name)
+  if (newName && newName.trim() && newName.trim() !== name) {
+    emit('renameParty', name, newName.trim())
+  }
+}
+
+function handleDelete(name: string): void {
+  if (window.confirm(t.value.party.deleteConfirm)) {
+    emit('deleteParty', name)
+  }
 }
 </script>
 
@@ -198,23 +207,80 @@ function removeFromRoster(name: string): void {
             :disabled="!combatants.length"
             @click="$emit('saveParty')"
           >
-            <Icon icon="tabler:users" height="18" />{{ t.party.saveCurrent }}
+            <Icon icon="tabler:device-floppy" height="18" />{{ t.party.saveCurrent }}
           </button>
           <button
             class="btn btn-neutral btn-sm"
-            :disabled="!savedRoster.length"
-            @click="$emit('loadParty')"
+            :disabled="!combatants.length"
+            @click="handleSavePartyAs"
           >
-            <Icon icon="tabler:users-plus" height="18" />{{ t.party.loadParty }}
+            <Icon icon="tabler:folder-plus" height="18" />{{ t.party.saveAs }}
           </button>
         </div>
 
-        <!-- Saved roster -->
+        <!-- Saved parties list -->
         <div class="border border-base-content/10 rounded-lg p-3 bg-base-100">
-          <div class="text-sm font-semibold mb-2">{{ t.party.roster }}</div>
-          <div v-if="savedRoster.length" class="flex flex-col gap-1">
+          <div class="text-sm font-semibold mb-2">{{ t.party.parties }}</div>
+          <div v-if="partyNames.length" class="flex flex-col gap-1">
             <div
-              v-for="member in savedRoster"
+              v-for="name in partyNames"
+              :key="name"
+              class="flex items-center gap-2 p-2 rounded bg-base-200/50"
+              :class="{ 'ring-1 ring-accent': name === activePartyName }"
+            >
+              <button
+                class="flex-1 text-left flex items-center gap-2"
+                @click="$emit('loadPartyByName', name)"
+              >
+                <Icon
+                  v-if="name === activePartyName"
+                  icon="tabler:circle-filled"
+                  height="10"
+                  class="text-accent shrink-0"
+                />
+                <Icon
+                  v-else
+                  icon="tabler:circle"
+                  height="10"
+                  class="text-base-content/30 shrink-0"
+                />
+                <span class="text-sm font-medium truncate">{{ name }}</span>
+                <span class="badge badge-xs badge-ghost">
+                  {{ partyRosters[name]?.length ?? 0 }}
+                </span>
+              </button>
+              <button
+                class="btn btn-ghost btn-xs btn-circle"
+                :title="t.party.rename"
+                @click="handleRename(name)"
+              >
+                <Icon icon="tabler:edit" height="14" />
+              </button>
+              <button
+                class="btn btn-ghost btn-xs btn-circle text-error"
+                :title="t.party.delete"
+                @click="handleDelete(name)"
+              >
+                <Icon icon="tabler:trash" height="14" />
+              </button>
+            </div>
+          </div>
+          <div v-else class="text-sm text-base-content/40 italic">{{ t.party.noParties }}</div>
+        </div>
+
+        <!-- Active party members -->
+        <div
+          v-if="activePartyName"
+          class="border border-base-content/10 rounded-lg p-3 bg-base-100"
+        >
+          <div class="text-sm font-semibold mb-2 flex items-center gap-2">
+            <Icon icon="tabler:users" height="16" />
+            {{ activePartyName }}
+            <span class="badge badge-xs badge-accent">{{ t.party.activeParty }}</span>
+          </div>
+          <div v-if="activeRoster.length" class="flex flex-col gap-1">
+            <div
+              v-for="member in activeRoster"
               :key="member.name"
               class="flex items-center justify-between gap-2 p-2 rounded bg-base-200/50"
             >
@@ -230,7 +296,7 @@ function removeFromRoster(name: string): void {
               </div>
               <button
                 class="btn btn-ghost btn-xs btn-circle text-error"
-                @click="removeFromRoster(member.name)"
+                @click="$emit('removeFromRoster', member.name)"
               >
                 <Icon icon="tabler:trash" height="16" />
               </button>
@@ -260,7 +326,6 @@ function removeFromRoster(name: string): void {
                 v-model="newPcName"
                 type="text"
                 class="input input-sm col-span-2 h-8"
-                list="monsters"
               />
             </div>
             <div class="grid grid-cols-3 items-center gap-2">

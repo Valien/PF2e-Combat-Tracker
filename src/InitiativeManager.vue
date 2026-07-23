@@ -373,27 +373,117 @@ function resetToDefaults(): void {
   combatants.value = getDefaultCombatants()
 }
 
-function loadParty(): void {
-  const saved = localStorage.getItem('partyRoster')
-  if (!saved) return
-  combatants.value = deserializeCombatantArray(saved)
+// --- Party roster storage (multiple named parties, reactive) ---
+// Each party is stored as a JSON-string array of plain combatant objects.
+// `partyRosters` = { "My Party": [{...}, ...], "Campaign B": [{...}] }
+// `activePartyName` tracks which party is currently loaded/active.
+
+// Migrate legacy single-roster format on first access.
+function migrateLegacyRoster(): Record<string, any[]> {
+  const legacy = localStorage.getItem('partyRoster')
+  if (legacy) {
+    try {
+      const parsed = JSON.parse(legacy)
+      const arr = Array.isArray(parsed) ? parsed : []
+      // Move into a named default party, then remove the old key.
+      if (arr.length > 0) {
+        const rosters: Record<string, any[]> = {}
+        rosters[localStorage.getItem('activePartyName') || 'My Party'] = arr
+        localStorage.removeItem('partyRoster')
+        localStorage.removeItem('activePartyName')
+        return rosters
+      }
+    } catch {
+      // ignore corrupt legacy data
+    }
+    localStorage.removeItem('partyRoster')
+  }
+  return {}
+}
+
+const partyRosters = useStorage<Record<string, any[]>>('partyRosters', migrateLegacyRoster())
+const activePartyName = useStorage<string>('activePartyName', '')
+
+/**
+ * Persists current PCs into the active party (or creates a default one).
+ * Uses the reactive `partyRosters` useStorage ref so the PartyManager UI
+ * updates immediately after save.
+ */
+function saveParty(): void {
+  const pcs = combatants.value.filter((c: Combatant) => c.visibility === 2 || c.type === 'pc')
+  const name = activePartyName.value || 'My Party'
+  partyRosters.value = { ...partyRosters.value, [name]: pcs }
+  activePartyName.value = name
+}
+
+/**
+ * Saves current PCs under a new party name. Called from the "Save As"
+ * prompt in PartyManager.
+ */
+function savePartyAs(name: string): void {
+  const pcs = combatants.value.filter((c: Combatant) => c.visibility === 2 || c.type === 'pc')
+  partyRosters.value = { ...partyRosters.value, [name]: pcs }
+  activePartyName.value = name
+}
+
+/**
+ * Loads a named party into the combatants list. Resets turn/round.
+ */
+function loadPartyByName(name: string): void {
+  const roster = partyRosters.value[name]
+  if (!roster || !Array.isArray(roster)) return
+  combatants.value = deserializeCombatantArray(roster)
+  activePartyName.value = name
   turn.value = 0
   round.value = 1
 }
 
 /**
- * Persists PC combatants (visibility=Full or type=pc) to localStorage as
- * the party roster. Lifted here from DMView so the End Combat flow can
- * auto-backup the party before clearing monsters.
- *
- * Stores a single JSON string of an array of plain combatant objects
- * (NOT an array of JSON strings — the previous implementation double-
- * stringified, which broke loadParty because deserializeCombatant received
- * string elements instead of objects and every field read as undefined).
+ * Loads the active party (or the first available) into combatants.
  */
-function saveParty(): void {
-  const pcs = combatants.value.filter((c: Combatant) => c.visibility === 2 || c.type === 'pc')
-  localStorage.setItem('partyRoster', JSON.stringify(pcs))
+function loadParty(): void {
+  const name = activePartyName.value || Object.keys(partyRosters.value)[0]
+  if (name) loadPartyByName(name)
+}
+
+/**
+ * Renames a saved party. If the active party is renamed, updates the
+ * active pointer too.
+ */
+function renameParty(oldName: string, newName: string): void {
+  const rosters = { ...partyRosters.value }
+  if (!(oldName in rosters)) return
+  rosters[newName] = rosters[oldName]
+  delete rosters[oldName]
+  partyRosters.value = rosters
+  if (activePartyName.value === oldName) activePartyName.value = newName
+}
+
+/**
+ * Deletes a saved party by name. If it was the active party, clears the
+ * active pointer.
+ */
+function deleteParty(name: string): void {
+  const rosters = { ...partyRosters.value }
+  delete rosters[name]
+  partyRosters.value = rosters
+  if (activePartyName.value === name) activePartyName.value = ''
+}
+
+/**
+ * Removes a single character from the active party roster by name.
+ */
+function removeFromRoster(name: string): void {
+  const partyName = activePartyName.value
+  if (!partyName) return
+  const roster = partyRosters.value[partyName]
+  if (!roster) return
+  partyRosters.value = {
+    ...partyRosters.value,
+    [partyName]: roster.filter(
+      (item: any) => (typeof item === 'string' ? JSON.parse(item) : item).name !== name,
+    ),
+  }
 }
 
 /**
@@ -435,27 +525,6 @@ function newPc(
   )
   saveParty()
 }
-
-/**
- * Removes a character from the saved party roster in localStorage by name.
- * Does NOT remove them from the current combatants list (if they're in play,
- * the DM should use the per-card delete button instead).
- */
-function removeFromRoster(name: string): void {
-  try {
-    const raw = localStorage.getItem('partyRoster')
-    if (!raw) return
-    const parsed = JSON.parse(raw)
-    if (!Array.isArray(parsed)) return
-    const filtered = parsed.filter((item: unknown) => {
-      const obj = typeof item === 'string' ? JSON.parse(item) : item
-      return obj.name !== name
-    })
-    localStorage.setItem('partyRoster', JSON.stringify(filtered))
-  } catch (e) {
-    console.error('Error removing from roster:', e)
-  }
-}
 </script>
 
 <template>
@@ -469,6 +538,8 @@ function removeFromRoster(name: string): void {
     :combatants="orderedCombatants"
     :is-online-mode="isOnlineMode"
     :session-id="sessionId"
+    :party-rosters="partyRosters"
+    :active-party-name="activePartyName"
     @next-turn="nextTurn"
     @prev-turn="prevTurn"
     @reset="reset"
@@ -477,7 +548,11 @@ function removeFromRoster(name: string): void {
     @remove-combatant="removeCombatant"
     @toggle-online-mode="toggleOnlineMode"
     @save-party="saveParty"
+    @save-party-as="savePartyAs"
     @load-party="loadParty"
+    @load-party-by-name="loadPartyByName"
+    @rename-party="renameParty"
+    @delete-party="deleteParty"
     @end-combat="endCombat"
     @new-pc="newPc"
     @remove-from-roster="removeFromRoster"

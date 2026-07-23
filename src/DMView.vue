@@ -46,7 +46,11 @@ const emit = defineEmits<{
   (e: 'removeCombatant', index: number): void
   (e: 'toggleOnlineMode', value: boolean): void
   (e: 'saveParty'): void
+  (e: 'savePartyAs', name: string): void
   (e: 'loadParty'): void
+  (e: 'loadPartyByName', name: string): void
+  (e: 'renameParty', oldName: string, newName: string): void
+  (e: 'deleteParty', name: string): void
   (e: 'endCombat'): void
   (e: 'newPc', name: string, HP: number, initiative: number, extras?: Record<string, unknown>): void
   (e: 'removeFromRoster', name: string): void
@@ -58,6 +62,8 @@ const props = defineProps<{
   combatants: Combatant[]
   isOnlineMode: boolean
   sessionId: string
+  partyRosters: Record<string, any[]>
+  activePartyName: string
 }>()
 
 const showCopiedMessage = ref(false)
@@ -409,10 +415,19 @@ async function copyPlayerUrl(): Promise<void> {
     <!-- Party Manager Side Panel -->
     <PartyManager
       :combatants="combatants"
-      @new-pc="(name, hp, init, extras) => $emit('newPc', name, hp, init, extras)"
+      :party-rosters="partyRosters"
+      :active-party-name="activePartyName"
+      @new-pc="
+        (name: string, hp: number, init: number, extras?: Record<string, unknown>) =>
+          $emit('newPc', name, hp, init, extras)
+      "
       @save-party="$emit('saveParty')"
+      @save-party-as="(name: string) => $emit('savePartyAs', name)"
       @load-party="$emit('loadParty')"
-      @remove-from-roster="(name) => $emit('removeFromRoster', name)"
+      @load-party-by-name="(name: string) => $emit('loadPartyByName', name)"
+      @rename-party="(oldName: string, newName: string) => $emit('renameParty', oldName, newName)"
+      @delete-party="(name: string) => $emit('deleteParty', name)"
+      @remove-from-roster="(name: string) => $emit('removeFromRoster', name)"
     />
   </div>
 </template>

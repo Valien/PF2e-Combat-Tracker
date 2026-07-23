@@ -115,6 +115,16 @@ type TranslationStructure = {
     load: string
     saveCurrent: string
     loadParty: string
+    parties: string
+    saveAs: string
+    saveAsPrompt: string
+    rename: string
+    renamePrompt: string
+    delete: string
+    deleteConfirm: string
+    activeParty: string
+    noParties: string
+    defaultPartyName: string
   }
   helpText: {
     actions: string[]
@@ -238,6 +248,16 @@ const translations: Record<Locale, TranslationStructure> = {
       load: 'Load',
       saveCurrent: 'Save current party',
       loadParty: 'Load party',
+      parties: 'Saved Parties',
+      saveAs: 'Save As...',
+      saveAsPrompt: 'Enter a name for this party:',
+      rename: 'Rename',
+      renamePrompt: 'Enter a new name for this party:',
+      delete: 'Delete',
+      deleteConfirm: 'Delete this party? This cannot be undone.',
+      activeParty: 'Active',
+      noParties: 'No saved parties',
+      defaultPartyName: 'My Party',
     },
     helpText: {
       actions: [
@@ -390,6 +410,16 @@ const translations: Record<Locale, TranslationStructure> = {
       load: 'Carregar',
       saveCurrent: 'Salvar grupo atual',
       loadParty: 'Carregar grupo',
+      parties: 'Grupos Salvos',
+      saveAs: 'Salvar Como...',
+      saveAsPrompt: 'Digite um nome para este grupo:',
+      rename: 'Renomear',
+      renamePrompt: 'Digite um novo nome para este grupo:',
+      delete: 'Excluir',
+      deleteConfirm: 'Excluir este grupo? Isso não pode ser desfeito.',
+      activeParty: 'Ativo',
+      noParties: 'Nenhum grupo salvo',
+      defaultPartyName: 'Meu Grupo',
     },
     helpText: {
       actions: [
