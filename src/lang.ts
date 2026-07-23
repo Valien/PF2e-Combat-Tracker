@@ -76,6 +76,17 @@ type TranslationStructure = {
     actions: string
     reaction: string
     resetActions: string
+    strike: string
+    quickActions: string
+    stride: string
+    step: string
+    demoralize: string
+    trip: string
+    grapple: string
+    shove: string
+    disarm: string
+    noActionsLeft: string
+    agile: string
   }
   endCombat: {
     title: string
@@ -208,6 +219,17 @@ const translations: Record<Locale, TranslationStructure> = {
       actions: 'Actions',
       reaction: 'Reaction',
       resetActions: 'Reset Actions',
+      strike: 'Strike',
+      quickActions: 'Quick Actions',
+      stride: 'Stride',
+      step: 'Step',
+      demoralize: 'Demoralize',
+      trip: 'Trip',
+      grapple: 'Grapple',
+      shove: 'Shove',
+      disarm: 'Disarm',
+      noActionsLeft: 'No actions left',
+      agile: 'Agile',
     },
     endCombat: {
       title: 'End Combat',
@@ -370,6 +392,17 @@ const translations: Record<Locale, TranslationStructure> = {
       actions: 'Ações',
       reaction: 'Reação',
       resetActions: 'Resetar Ações',
+      strike: 'Golpe',
+      quickActions: 'Ações Rápidas',
+      stride: 'Deslocar',
+      step: 'Passo',
+      demoralize: 'Intimidar',
+      trip: 'Derrubar',
+      grapple: 'Agarrar',
+      shove: 'Empurrar',
+      disarm: 'Desarmar',
+      noActionsLeft: 'Sem ações restantes',
+      agile: 'Ágil',
     },
     endCombat: {
       title: 'Encerrar Combate',

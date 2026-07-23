@@ -187,6 +187,28 @@ function inferWeaponType(name: string): 'melee' | 'ranged' {
   return RANGED_KEYWORDS.some((kw) => name.toLowerCase().includes(kw)) ? 'ranged' : 'melee'
 }
 
+/** Common agile weapon name fragments (agile weapons use -4/-8 MAP). */
+const AGILE_KEYWORDS = [
+  'dagger',
+  'shortsword',
+  'rapier',
+  'fist',
+  'claw',
+  'bite',
+  'jaws',
+  'sting',
+  'knuckle',
+  'sai',
+  'kukri',
+  'kama',
+  'nunchaku',
+  'tonfa',
+]
+
+function inferAgile(name: string): boolean {
+  return AGILE_KEYWORDS.some((kw) => name.toLowerCase().includes(kw))
+}
+
 // --- Parser --------------------------------------------------------------
 
 export class PathbuilderParseError extends Error {
@@ -301,6 +323,7 @@ export function parsePathbuilderExport(input: unknown): PathbuilderCombatant {
     const dice = strikingDice(w.str)
     const damageType = expandDamageType(w.damageType)
     const damageString = buildDamageString(dice, w.die, w.damageBonus)
+    const agile = inferAgile(weaponName)
 
     // Append extra damage notes (e.g. "+2 precision") to the damage string
     let finalDamage = damageString
@@ -309,15 +332,18 @@ export function parsePathbuilderExport(input: unknown): PathbuilderCombatant {
       finalDamage = finalDamage ? `${finalDamage} + ${extraStr}` : extraStr
     }
 
+    const bonus = w.attack ?? 0
+    // MAP: -4/-8 for agile, -5/-10 for non-agile (PF2e RAW).
+    // These are defaults; the combat tracker recomputes via getStrikeBonus
+    // based on traits at runtime, but setting them here makes the stat
+    // block display correct out of the box.
     return {
       name: weaponName,
-      // PB stores final attack bonus in `w.attack`
-      bonus: w.attack ?? 0,
+      bonus,
       type: inferWeaponType(weaponName),
-      // MAP defaults: -5/-10 (non-agile). PB doesn't reliably store agile,
-      // so this is a conservative default; DM can adjust per-weapon.
-      map1: (w.attack ?? 0) - 5,
-      map2: (w.attack ?? 0) - 10,
+      map1: bonus - (agile ? 4 : 5),
+      map2: bonus - (agile ? 8 : 10),
+      ...(agile && { traits: ['agile'] }),
       ...(finalDamage && { damage: finalDamage }),
       ...(damageType && { damageType }),
     }

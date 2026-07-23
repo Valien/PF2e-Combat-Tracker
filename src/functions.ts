@@ -509,8 +509,51 @@ function colorIsDark(bgColor: string): boolean {
   return r * 0.299 + g * 0.587 + b * 0.114 <= 100
 }
 
+/**
+ * Returns true if the attack has the "agile" trait. Agile weapons use
+ * -4/-8 MAP instead of the standard -5/-10. The trait list comes from
+ * AoN-scraped data (per-attack traits) or Pathbuilder imports (weapon
+ * traits). If traits are missing, defaults to non-agile (the common case).
+ */
+function isAgile(attack: MonsterAttack): boolean {
+  return attack.traits?.some((t) => t.toLowerCase() === 'agile') ?? false
+}
+
+/**
+ * Returns the attack bonus at a given MAP tier based on actions used.
+ *
+ * PF2e Multiple Attack Penalty (MAP):
+ *   0 actions used   → full bonus (1st Strike)
+ *   1 action used    → map1 (2nd Strike): -5 (or -4 if agile)
+ *   2+ actions used  → map2 (3rd Strike): -10 (or -8 if agile)
+ *   3+ actions used  → same as map2 (no further penalty; pips prevent a 4th)
+ *
+ * Uses `attack.map1`/`attack.map2` when present (AoN-scraped data includes
+ * them when the stat block shows `[+12/+7/+2]` format). Falls back to
+ * computing from `attack.bonus - penalty` when missing.
+ *
+ * @param attack - The monster attack (must have `bonus`)
+ * @param actionsUsed - How many actions the creature has already spent this turn
+ * @returns The modified attack roll bonus at the current MAP tier
+ */
+function getStrikeBonus(attack: MonsterAttack, actionsUsed: number): number {
+  if (actionsUsed <= 0) return attack.bonus
+
+  const agile = isAgile(attack)
+  const penalty1 = agile ? 4 : 5
+  const penalty2 = agile ? 8 : 10
+
+  if (actionsUsed === 1) {
+    return attack.map1 ?? attack.bonus - penalty1
+  }
+  // 2+ actions used → map2 tier (3rd Strike)
+  return attack.map2 ?? attack.bonus - penalty2
+}
+
 export {
   colorIsDark,
+  isAgile,
+  getStrikeBonus,
   Visibility,
   Condition,
   Combatant,

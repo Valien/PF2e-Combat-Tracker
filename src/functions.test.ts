@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { Combatant, Condition, Visibility, colorIsDark } from './functions'
+import { Combatant, Condition, Visibility, colorIsDark, getStrikeBonus, isAgile } from './functions'
 import {
   migrateCombatants,
   deserializeCombatant,
@@ -704,5 +704,104 @@ describe('deserializeCombatantArray - party roster (save/load round-trip)', () =
     expect(deserializeCombatantArray(null)).toHaveLength(4)
     expect(deserializeCombatantArray(undefined)).toHaveLength(4)
     expect(deserializeCombatantArray('')).toHaveLength(4)
+  })
+})
+
+describe('getStrikeBonus - MAP computation', () => {
+  const nonAgileAttack = {
+    name: 'Jaws',
+    type: 'melee' as const,
+    bonus: 17,
+    map1: 12,
+    map2: 7,
+  }
+
+  const agileAttack = {
+    name: 'Claw',
+    type: 'melee' as const,
+    bonus: 15,
+    map1: 11,
+    map2: 7,
+    traits: ['agile'],
+  }
+
+  const noMapAttack = {
+    name: 'Slam',
+    type: 'melee' as const,
+    bonus: 10,
+    // map1/map2 missing — should compute from bonus
+  }
+
+  const noMapAgileAttack = {
+    name: 'Dagger',
+    type: 'melee' as const,
+    bonus: 10,
+    traits: ['agile'],
+    // map1/map2 missing — should compute from bonus with agile penalty
+  }
+
+  it('should return full bonus when 0 actions used (1st Strike)', () => {
+    expect(getStrikeBonus(nonAgileAttack, 0)).toBe(17)
+    expect(getStrikeBonus(agileAttack, 0)).toBe(15)
+    expect(getStrikeBonus(noMapAttack, 0)).toBe(10)
+  })
+
+  it('should return map1 when 1 action used (2nd Strike)', () => {
+    expect(getStrikeBonus(nonAgileAttack, 1)).toBe(12)
+    expect(getStrikeBonus(agileAttack, 1)).toBe(11)
+  })
+
+  it('should return map2 when 2 actions used (3rd Strike)', () => {
+    expect(getStrikeBonus(nonAgileAttack, 2)).toBe(7)
+    expect(getStrikeBonus(agileAttack, 2)).toBe(7)
+  })
+
+  it('should stay at map2 when 3 actions used (pips prevent a 4th)', () => {
+    expect(getStrikeBonus(nonAgileAttack, 3)).toBe(7)
+    expect(getStrikeBonus(agileAttack, 3)).toBe(7)
+  })
+
+  it('should compute map1/map2 from bonus when missing (non-agile: -5/-10)', () => {
+    expect(getStrikeBonus(noMapAttack, 0)).toBe(10)
+    expect(getStrikeBonus(noMapAttack, 1)).toBe(5) // 10 - 5
+    expect(getStrikeBonus(noMapAttack, 2)).toBe(0) // 10 - 10
+    expect(getStrikeBonus(noMapAttack, 3)).toBe(0) // stays at map2
+  })
+
+  it('should compute map1/map2 from bonus when missing (agile: -4/-8)', () => {
+    expect(getStrikeBonus(noMapAgileAttack, 0)).toBe(10)
+    expect(getStrikeBonus(noMapAgileAttack, 1)).toBe(6) // 10 - 4
+    expect(getStrikeBonus(noMapAgileAttack, 2)).toBe(2) // 10 - 8
+    expect(getStrikeBonus(noMapAgileAttack, 3)).toBe(2) // stays at map2
+  })
+
+  it('should handle negative bonuses correctly', () => {
+    const weakAttack = { name: 'Weak Bite', type: 'melee' as const, bonus: -2, map1: -7, map2: -12 }
+    expect(getStrikeBonus(weakAttack, 0)).toBe(-2)
+    expect(getStrikeBonus(weakAttack, 1)).toBe(-7)
+    expect(getStrikeBonus(weakAttack, 2)).toBe(-12)
+  })
+})
+
+describe('isAgile', () => {
+  it('should return true when traits include "agile"', () => {
+    expect(
+      isAgile({ name: 'Dagger', type: 'melee', bonus: 10, traits: ['agile', 'finesse'] }),
+    ).toBe(true)
+  })
+
+  it('should return false when traits do not include "agile"', () => {
+    expect(isAgile({ name: 'Longsword', type: 'melee', bonus: 10, traits: ['versatile'] })).toBe(
+      false,
+    )
+  })
+
+  it('should return false when traits are missing', () => {
+    expect(isAgile({ name: 'Slam', type: 'melee', bonus: 10 })).toBe(false)
+  })
+
+  it('should be case-insensitive', () => {
+    expect(isAgile({ name: 'Claw', type: 'melee', bonus: 10, traits: ['AGILE'] })).toBe(true)
+    expect(isAgile({ name: 'Claw', type: 'melee', bonus: 10, traits: ['Agile'] })).toBe(true)
   })
 })

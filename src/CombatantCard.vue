@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { Combatant, Visibility, colorIsDark } from './functions.ts'
+import { Combatant, Visibility, colorIsDark, getStrikeBonus, isAgile } from './functions.ts'
 import { Icon } from '@iconify/vue'
 import { useTranslations } from './lang.ts'
 import { useTempHP } from './composables/useSettings'
@@ -293,6 +293,74 @@ const hasStatBlock = computed(
         </button>
       </div>
 
+      <!-- Quick Actions (DM only, when stat block exists) -->
+      <div v-if="!isReadOnly && hasStatBlock" class="flex flex-wrap items-center gap-1 min-h-6">
+        <span class="text-xs text-base-content/40 mr-1">{{ t.card.quickActions }}:</span>
+        <button
+          class="btn btn-ghost btn-xs"
+          :disabled="combatant.actionsUsed >= 3"
+          :title="t.card.stride"
+          @click="combatant.useAction()"
+        >
+          <Icon icon="tabler:run" height="14" />
+          <span class="text-xs">{{ t.card.stride }}</span>
+        </button>
+        <button
+          class="btn btn-ghost btn-xs"
+          :disabled="combatant.actionsUsed >= 3"
+          :title="t.card.step"
+          @click="combatant.useAction()"
+        >
+          <Icon icon="tabler:walk" height="14" />
+          <span class="text-xs">{{ t.card.step }}</span>
+        </button>
+        <button
+          class="btn btn-ghost btn-xs"
+          :disabled="combatant.actionsUsed >= 3"
+          :title="`${t.card.demoralize} (Intimidation)`"
+          @click="combatant.useAction()"
+        >
+          <Icon icon="tabler:mood-angry" height="14" />
+          <span class="text-xs">{{ t.card.demoralize }}</span>
+        </button>
+        <button
+          class="btn btn-ghost btn-xs"
+          :disabled="combatant.actionsUsed >= 3"
+          :title="`${t.card.trip} (Athletics vs Reflex DC)`"
+          @click="combatant.useAction()"
+        >
+          <Icon icon="tabler:arrow-back-up" height="14" />
+          <span class="text-xs">{{ t.card.trip }}</span>
+        </button>
+        <button
+          class="btn btn-ghost btn-xs"
+          :disabled="combatant.actionsUsed >= 3"
+          :title="`${t.card.grapple} (Athletics vs Fortitude DC)`"
+          @click="combatant.useAction()"
+        >
+          <Icon icon="tabler:hand-grab" height="14" />
+          <span class="text-xs">{{ t.card.grapple }}</span>
+        </button>
+        <button
+          class="btn btn-ghost btn-xs"
+          :disabled="combatant.actionsUsed >= 3"
+          :title="`${t.card.shove} (Athletics vs Fortitude DC)`"
+          @click="combatant.useAction()"
+        >
+          <Icon icon="tabler:arrows-horizontal" height="14" />
+          <span class="text-xs">{{ t.card.shove }}</span>
+        </button>
+        <button
+          class="btn btn-ghost btn-xs"
+          :disabled="combatant.actionsUsed >= 3"
+          :title="`${t.card.disarm} (Athletics vs Reflex DC)`"
+          @click="combatant.useAction()"
+        >
+          <Icon icon="tabler:hand-stop" height="14" />
+          <span class="text-xs">{{ t.card.disarm }}</span>
+        </button>
+      </div>
+
       <!-- Conditions -->
       <div class="flex flex-wrap items-center gap-1 min-h-8">
         <button
@@ -422,13 +490,30 @@ const hasStatBlock = computed(
             <strong>{{ t.statBlock.immunities }}:</strong>
             {{ combatant.immunities.join(', ') }}
           </div>
-          <!-- Attacks -->
+          <!-- Attacks — interactive Strike buttons with MAP-aware bonus -->
           <div v-if="combatant.attacks?.length" class="text-xs">
-            <strong>{{ t.statBlock.attacks }}:</strong>
-            <div v-for="atk in combatant.attacks" :key="atk.name" class="ml-2">
-              <span class="font-semibold">{{ atk.name }}</span>
-              ({{ atk.type }}) +{{ atk.bonus }}
-              <span v-if="atk.damage"> — {{ atk.damage }} {{ atk.damageType }}</span>
+            <strong>{{ t.card.strike }}:</strong>
+            <div v-for="atk in combatant.attacks" :key="atk.name" class="ml-2 mt-1">
+              <button
+                class="btn btn-xs btn-ghost flex items-center gap-1"
+                :disabled="combatant.actionsUsed >= 3"
+                :class="{ 'opacity-50': combatant.actionsUsed >= 3 }"
+                :title="isAgile(atk) ? t.card.agile : undefined"
+                @click="combatant.useAction()"
+              >
+                <Icon icon="tabler:sword" height="14" />
+                <span class="font-semibold">{{ atk.name }}</span>
+                <span class="badge badge-xs badge-neutral font-mono">
+                  +{{ getStrikeBonus(atk, combatant.actionsUsed) }}
+                </span>
+                <span v-if="isAgile(atk)" class="badge badge-xs badge-ghost">{{
+                  t.card.agile
+                }}</span>
+              </button>
+              <span v-if="atk.damage" class="text-base-content/60 ml-1">
+                {{ atk.damage }} {{ atk.damageType }}
+              </span>
+              <span class="text-base-content/40 ml-1">({{ atk.type }})</span>
             </div>
           </div>
           <!-- Abilities -->
