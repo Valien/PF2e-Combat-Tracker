@@ -1,6 +1,11 @@
 import { describe, it, expect } from 'vitest'
 import { Combatant, Condition, Visibility, colorIsDark } from './functions'
-import { migrateCombatants, deserializeCombatant, CURRENT_SCHEMA_VERSION } from './serialization'
+import {
+  migrateCombatants,
+  deserializeCombatant,
+  deserializeCombatantArray,
+  CURRENT_SCHEMA_VERSION,
+} from './serialization'
 import { computeMonsterXP } from './xp'
 
 describe('Condition', () => {
@@ -650,5 +655,54 @@ describe('computeMonsterXP (PF2e XP table)', () => {
   it('should default partyLevel to 1', () => {
     expect(computeMonsterXP(1)).toBe(40) // 1 - 1 = 0 -> 40 XP
     expect(computeMonsterXP(5)).toBe(160) // 5 - 1 = 4 -> 160 XP
+  })
+})
+
+describe('deserializeCombatantArray - party roster (save/load round-trip)', () => {
+  it('should round-trip a single-stringified roster (the fixed format)', () => {
+    // This mirrors the fixed saveParty: JSON.stringify(combatantsArray).
+    const party = [
+      new Combatant('Amiri', 22, 4, 22, [], Visibility.Full, 0, 0, { type: 'pc' }),
+      new Combatant('Lini', 18, 3, 15, [], Visibility.Full, 0, 0, { type: 'pc' }),
+    ]
+    const saved = JSON.stringify(party)
+    // Simulate loading from localStorage: deserializeCombatantArray(savedString)
+    const loaded = deserializeCombatantArray(saved)
+    expect(loaded).toHaveLength(2)
+    expect(loaded[0]).toBeInstanceOf(Combatant)
+    expect(loaded[0].name).toBe('Amiri')
+    expect(loaded[0].totalHP).toBe(22)
+    expect(loaded[0].currentHP).toBe(22)
+    expect(loaded[0].type).toBe('pc')
+    expect(loaded[1].name).toBe('Lini')
+    expect(loaded[1].currentHP).toBe(15)
+  })
+
+  it('should load a legacy double-stringified roster without undefined fields', () => {
+    // Mirrors the buggy saveParty: JSON.stringify(party.map(c => JSON.stringify(c))).
+    // Each element becomes a JSON string, and the whole thing is stringified again.
+    const party = [
+      new Combatant('Amiri', 22, 4, 22, [], Visibility.Full, 0, 0, { type: 'pc' }),
+      new Combatant('Lini', 18, 3, 18, [], Visibility.Full, 0, 0, { type: 'pc' }),
+    ]
+    const buggySaved = JSON.stringify(party.map((c) => JSON.stringify(c)))
+
+    const loaded = deserializeCombatantArray(buggySaved)
+    expect(loaded).toHaveLength(2)
+    expect(loaded[0]).toBeInstanceOf(Combatant)
+    // The regression: each field used to read as undefined because the
+    // element was a string, not an object. Now the loader parses strings.
+    expect(loaded[0].name).toBe('Amiri')
+    expect(loaded[0].totalHP).toBe(22)
+    expect(loaded[0].currentHP).toBe(22)
+    expect(loaded[0].type).toBe('pc')
+    expect(loaded[1].name).toBe('Lini')
+    expect(loaded[1].totalHP).toBe(18)
+  })
+
+  it('should fall back to default combatants when raw is empty/null', () => {
+    expect(deserializeCombatantArray(null)).toHaveLength(4)
+    expect(deserializeCombatantArray(undefined)).toHaveLength(4)
+    expect(deserializeCombatantArray('')).toHaveLength(4)
   })
 })

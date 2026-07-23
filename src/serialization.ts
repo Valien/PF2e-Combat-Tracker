@@ -135,11 +135,19 @@ export function deserializeCombatant(combatant: any): Combatant {
 /**
  * Rehydrate an array of plain combatant objects into class instances.
  * Falls back to default combatants if the input is missing/empty.
+ *
+ * Defensively handles string elements: an older version of saveParty
+ * double-stringified each combatant before writing the roster, producing
+ * an array of JSON strings on parse. If we encounter a string element we
+ * JSON.parse it first so legacy rosters still load instead of surfacing
+ * a card full of `undefined`.
  */
 export function deserializeCombatantArray(raw: any): Combatant[] {
   if (!raw) return getDefaultCombatants()
   const parsed = Array.isArray(raw) ? raw : JSON.parse(raw)
-  return parsed.map(deserializeCombatant)
+  return parsed.map((item: any) =>
+    typeof item === 'string' ? deserializeCombatant(JSON.parse(item)) : deserializeCombatant(item),
+  )
 }
 
 /**

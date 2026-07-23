@@ -385,11 +385,15 @@ function loadParty(): void {
  * Persists PC combatants (visibility=Full or type=pc) to localStorage as
  * the party roster. Lifted here from DMView so the End Combat flow can
  * auto-backup the party before clearing monsters.
+ *
+ * Stores a single JSON string of an array of plain combatant objects
+ * (NOT an array of JSON strings — the previous implementation double-
+ * stringified, which broke loadParty because deserializeCombatant received
+ * string elements instead of objects and every field read as undefined).
  */
 function saveParty(): void {
   const pcs = combatants.value.filter((c: Combatant) => c.visibility === 2 || c.type === 'pc')
-  const serialized = pcs.map((c: Combatant) => JSON.stringify(c))
-  localStorage.setItem('partyRoster', JSON.stringify(serialized))
+  localStorage.setItem('partyRoster', JSON.stringify(pcs))
 }
 
 /**
