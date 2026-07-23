@@ -3,6 +3,7 @@ import { ref, computed, watch, nextTick } from 'vue'
 import CombatantCard from './CombatantCard.vue'
 import InitiativeStrip from './InitiativeStrip.vue'
 import EndCombatModal from './EndCombatModal.vue'
+import PartyManager from './PartyManager.vue'
 import Settings from './Settings.vue'
 import { Combatant, Visibility } from './functions.ts'
 import { Icon } from '@iconify/vue'
@@ -47,6 +48,8 @@ const emit = defineEmits<{
   (e: 'saveParty'): void
   (e: 'loadParty'): void
   (e: 'endCombat'): void
+  (e: 'newPc', name: string, HP: number, initiative: number, extras?: Record<string, unknown>): void
+  (e: 'removeFromRoster', name: string): void
 }>()
 
 const props = defineProps<{
@@ -150,7 +153,11 @@ function addCombatant(): void {
           abilities: monster.abilities,
           aonUrl: monster.url,
         }
-      : undefined
+      : {
+          // No bestiary match → DM-created NPC (per functions.ts docstring:
+          // "DM-created creatures without a bestiary entry")
+          type: 'npc' as const,
+        }
     emit(
       'newCombatant',
       getCombatantName(i),
@@ -162,19 +169,6 @@ function addCombatant(): void {
   }
   isNewCombatantPopoverOpen.value = false
   setTimeout(clearNewCombatant, 1)
-}
-
-const hasPartyRoster = computed(() => {
-  const roster = localStorage.getItem('partyRoster')
-  return roster && JSON.parse(roster).length > 0
-})
-
-function saveParty() {
-  emit('saveParty')
-}
-
-function loadParty() {
-  emit('loadParty')
 }
 
 function removeCombatant(index: number): void {
@@ -264,26 +258,19 @@ async function copyPlayerUrl(): Promise<void> {
         <Icon icon="tabler:settings" height="18" />{{ t.options.settings }}
       </button>
 
-      <button class="btn btn-ghost btn-sm" :disabled="!combatants.length" @click="saveParty">
-        <Icon icon="tabler:users" height="18" />{{ t.card.saveParty }}
-      </button>
-      <button v-if="hasPartyRoster" class="btn btn-ghost btn-sm" @click="loadParty">
-        <Icon icon="tabler:users-plus" height="18" />{{ t.card.loadParty }}
-      </button>
-
-      <!-- Add Combatant Popover -->
+      <!-- Add Monster/NPC Popover -->
       <PopoverRoot
         :open="isNewCombatantPopoverOpen"
         @update:open="(v) => (isNewCombatantPopoverOpen = v)"
       >
         <PopoverTrigger as-child>
           <button class="btn btn-accent btn-sm">
-            <Icon icon="tabler:plus" height="18" />{{ t.dm_actions.add }}
+            <Icon icon="tabler:plus" height="18" />{{ t.dm_actions.addMonster }}
           </button>
         </PopoverTrigger>
         <PopoverPortal>
           <PopoverContent class="card w-96 bg-base-300 card-md shadow-xl z-50" role="dialog">
-            <div class="card-body" @keydown.enter.prevent="addCombatant">
+            <div class="card-body">
               <div class="grid grid-cols-3 items-center gap-3">
                 <Label for="newName" class="text-sm">{{ t.table.name }}</Label>
                 <input
@@ -417,6 +404,15 @@ async function copyPlayerUrl(): Promise<void> {
       :combatants="combatants"
       @close="showEndCombatModal = false"
       @end-combat="$emit('endCombat')"
+    />
+
+    <!-- Party Manager Side Panel -->
+    <PartyManager
+      :combatants="combatants"
+      @new-pc="(name, hp, init, extras) => $emit('newPc', name, hp, init, extras)"
+      @save-party="$emit('saveParty')"
+      @load-party="$emit('loadParty')"
+      @remove-from-roster="(name) => $emit('removeFromRoster', name)"
     />
   </div>
 </template>

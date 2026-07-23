@@ -18,6 +18,7 @@ type TranslationStructure = {
     resetTooltip: string
     playerView: string
     add: string
+    addMonster: string
     clear: string
     quantity: string
     onlineMode: string
@@ -97,6 +98,24 @@ type TranslationStructure = {
     prev: string
     next: string
   }
+  party: {
+    title: string
+    toggle: string
+    roster: string
+    empty: string
+    addPc: string
+    addPcFull: string
+    importPathbuilder: string
+    importHint: string
+    pasteJson: string
+    parse: string
+    parseError: string
+    parseSuccess: string
+    save: string
+    load: string
+    saveCurrent: string
+    loadParty: string
+  }
   helpText: {
     actions: string[]
     hp: string[]
@@ -120,6 +139,7 @@ const translations: Record<Locale, TranslationStructure> = {
       resetTooltip: 'Clear all combatants for a new encounter',
       playerView: 'Player View',
       add: 'Add',
+      addMonster: 'Add Monster/NPC',
       clear: 'Clear',
       quantity: 'Quantity',
       onlineMode: 'Online Mode',
@@ -200,6 +220,25 @@ const translations: Record<Locale, TranslationStructure> = {
       prev: 'Previous',
       next: 'Next',
     },
+    party: {
+      title: 'Party',
+      toggle: 'Party Manager',
+      roster: 'Saved Party',
+      empty: 'No saved party members',
+      addPc: 'Add PC',
+      addPcFull: 'Add Player Character',
+      importPathbuilder: 'Import from Pathbuilder 2e',
+      importHint:
+        'Export your character from Pathbuilder 2e as JSON, then paste or upload it here.',
+      pasteJson: 'Paste Pathbuilder JSON here...',
+      parse: 'Import',
+      parseError: 'Could not parse the JSON. Make sure it is a Pathbuilder 2e export.',
+      parseSuccess: 'Character imported successfully!',
+      save: 'Save',
+      load: 'Load',
+      saveCurrent: 'Save current party',
+      loadParty: 'Load party',
+    },
     helpText: {
       actions: [
         '<icon:tabler:eye-off /> Hidden from player view; ignored during turn advancement',
@@ -252,6 +291,7 @@ const translations: Record<Locale, TranslationStructure> = {
       resetTooltip: 'Limpar todos os combatentes para um novo encontro',
       playerView: 'Player View',
       add: 'Adicionar',
+      addMonster: 'Adicionar Monstro/NPC',
       clear: 'Limpar',
       quantity: 'Quantidade',
       onlineMode: 'Modo Online',
@@ -331,6 +371,25 @@ const translations: Record<Locale, TranslationStructure> = {
     nav: {
       prev: 'Anterior',
       next: 'Próximo',
+    },
+    party: {
+      title: 'Grupo',
+      toggle: 'Gerenciador de Grupo',
+      roster: 'Grupo Salvo',
+      empty: 'Nenhum membro de grupo salvo',
+      addPc: 'Adicionar PJ',
+      addPcFull: 'Adicionar Personagem Jogador',
+      importPathbuilder: 'Importar do Pathbuilder 2e',
+      importHint: 'Exporte seu personagem do Pathbuilder 2e como JSON, e cole ou envie aqui.',
+      pasteJson: 'Cole o JSON do Pathbuilder aqui...',
+      parse: 'Importar',
+      parseError:
+        'Não foi possível analisar o JSON. Verifique se é uma exportação do Pathbuilder 2e.',
+      parseSuccess: 'Personagem importado com sucesso!',
+      save: 'Salvar',
+      load: 'Carregar',
+      saveCurrent: 'Salvar grupo atual',
+      loadParty: 'Carregar grupo',
     },
     helpText: {
       actions: [

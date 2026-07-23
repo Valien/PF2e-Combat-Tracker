@@ -418,6 +418,44 @@ function endCombat(): void {
   turn.value = 0
   round.value = 1
 }
+
+/**
+ * Adds a PC to the combatants list and auto-saves the party roster.
+ * Called from the PartyManager panel — either via manual PC entry or
+ * Pathbuilder 2e import. PCs default to Full visibility (player-visible).
+ */
+function newPc(
+  name: string,
+  HP: number,
+  initiative: number,
+  extras?: Record<string, unknown>,
+): void {
+  combatants.value.push(
+    new Combatant(name, HP, initiative, HP, [], Visibility.Full, 0, 0, extras as any),
+  )
+  saveParty()
+}
+
+/**
+ * Removes a character from the saved party roster in localStorage by name.
+ * Does NOT remove them from the current combatants list (if they're in play,
+ * the DM should use the per-card delete button instead).
+ */
+function removeFromRoster(name: string): void {
+  try {
+    const raw = localStorage.getItem('partyRoster')
+    if (!raw) return
+    const parsed = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return
+    const filtered = parsed.filter((item: unknown) => {
+      const obj = typeof item === 'string' ? JSON.parse(item) : item
+      return obj.name !== name
+    })
+    localStorage.setItem('partyRoster', JSON.stringify(filtered))
+  } catch (e) {
+    console.error('Error removing from roster:', e)
+  }
+}
 </script>
 
 <template>
@@ -441,6 +479,8 @@ function endCombat(): void {
     @save-party="saveParty"
     @load-party="loadParty"
     @end-combat="endCombat"
+    @new-pc="newPc"
+    @remove-from-roster="removeFromRoster"
   />
   <PlayerView v-else :turn="turn" :round="round" :combatants="orderedCombatants" />
 </template>
