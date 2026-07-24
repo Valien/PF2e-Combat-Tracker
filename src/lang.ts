@@ -136,6 +136,11 @@ type TranslationStructure = {
     activeParty: string
     noParties: string
     defaultPartyName: string
+    modules: string
+    selectModule: string
+    addEncounter: string
+    encounterAdded: string
+    noEncounters: string
   }
   helpText: {
     actions: string[]
@@ -280,6 +285,11 @@ const translations: Record<Locale, TranslationStructure> = {
       activeParty: 'Active',
       noParties: 'No saved parties',
       defaultPartyName: 'My Party',
+      modules: 'Adventure Modules',
+      selectModule: 'Select a module...',
+      addEncounter: 'Add',
+      encounterAdded: 'Added',
+      noEncounters: 'No encounters in this module',
     },
     helpText: {
       actions: [
@@ -453,6 +463,11 @@ const translations: Record<Locale, TranslationStructure> = {
       activeParty: 'Ativo',
       noParties: 'Nenhum grupo salvo',
       defaultPartyName: 'Meu Grupo',
+      modules: 'Módulos de Aventura',
+      selectModule: 'Selecione um módulo...',
+      addEncounter: 'Adicionar',
+      encounterAdded: 'Adicionado',
+      noEncounters: 'Sem encontros neste módulo',
     },
     helpText: {
       actions: [

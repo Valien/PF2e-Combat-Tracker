@@ -6,6 +6,7 @@ import { useTranslations } from './lang.ts'
 import { useStorage } from '@vueuse/core'
 import { parsePathbuilderExport, PathbuilderParseError } from './pathbuilder.ts'
 import { Label, NumberFieldRoot, NumberFieldInput } from 'reka-ui'
+import { getModules, type ModuleData, type ModuleEncounter } from './modules.ts'
 
 const { t } = useTranslations()
 
@@ -25,6 +26,7 @@ const emit = defineEmits<{
   (e: 'renameParty', oldName: string, newName: string): void
   (e: 'deleteParty', name: string): void
   (e: 'removeFromRoster', name: string): void
+  (e: 'loadEncounter', encounter: ModuleEncounter): void
 }>()
 
 const isOpen = useStorage<boolean>('partyPanelOpen', false)
@@ -160,6 +162,39 @@ function handleDelete(name: string): void {
     emit('deleteParty', name)
   }
 }
+
+// --- Adventure modules ---
+const isModulesOpen = ref(false)
+const selectedModuleId = ref<string>('')
+const modules = getModules()
+const selectedModule = computed<ModuleData | undefined>(() =>
+  modules.find((m) => m.id === selectedModuleId.value),
+)
+
+// Group encounters by act for display
+const encounterGroups = computed(() => {
+  const mod = selectedModule.value
+  if (!mod) return []
+  const groups: { act: string; encounters: ModuleEncounter[] }[] = []
+  for (const enc of mod.encounters) {
+    const act = enc.act || ''
+    let group = groups.find((g) => g.act === act)
+    if (!group) {
+      group = { act, encounters: [] }
+      groups.push(group)
+    }
+    group.encounters.push(enc)
+  }
+  return groups
+})
+
+// Track which encounters have been added to current combat (by monster names)
+const addedEncounterIds = ref<Set<string>>(new Set())
+
+function handleLoadEncounter(encounter: ModuleEncounter): void {
+  emit('loadEncounter', encounter)
+  addedEncounterIds.value.add(encounter.id)
+}
 </script>
 
 <template>
@@ -225,11 +260,12 @@ function handleDelete(name: string): void {
             <div
               v-for="name in partyNames"
               :key="name"
-              class="flex items-center gap-2 p-2 rounded bg-base-200/50"
+              class="group flex items-center gap-2 p-2 rounded bg-base-200/50"
               :class="{ 'ring-1 ring-accent': name === activePartyName }"
             >
               <button
-                class="flex-1 text-left flex items-center gap-2"
+                class="flex-1 text-left flex items-center gap-2 hover:bg-base-300/60 transition-colors rounded -mx-1 px-1 py-0.5"
+                :title="t.party.loadParty"
                 @click="$emit('loadPartyByName', name)"
               >
                 <Icon
@@ -248,6 +284,11 @@ function handleDelete(name: string): void {
                 <span class="badge badge-xs badge-ghost">
                   {{ partyRosters[name]?.length ?? 0 }}
                 </span>
+                <Icon
+                  icon="tabler:chevron-right"
+                  height="16"
+                  class="ml-auto text-base-content/30 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                />
               </button>
               <button
                 class="btn btn-ghost btn-xs btn-circle"
@@ -303,6 +344,88 @@ function handleDelete(name: string): void {
             </div>
           </div>
           <div v-else class="text-sm text-base-content/40 italic">{{ t.party.empty }}</div>
+        </div>
+
+        <!-- Adventure Modules -->
+        <div class="border border-base-content/10 rounded-lg p-3 bg-base-100">
+          <button
+            class="flex items-center gap-2 text-sm font-semibold w-full"
+            @click="isModulesOpen = !isModulesOpen"
+          >
+            <Icon
+              :icon="isModulesOpen ? 'tabler:chevron-down' : 'tabler:chevron-right'"
+              height="18"
+            />
+            <Icon icon="tabler:book" height="18" />
+            {{ t.party.modules }}
+          </button>
+
+          <div v-if="isModulesOpen" class="mt-3 flex flex-col gap-3">
+            <select
+              v-model="selectedModuleId"
+              class="select select-sm"
+            >
+              <option value="" disabled>{{ t.party.selectModule }}</option>
+              <option v-for="mod in modules" :key="mod.id" :value="mod.id">
+                {{ mod.name }}
+              </option>
+            </select>
+
+            <div v-if="selectedModule?.description" class="text-xs text-base-content/60">
+              {{ selectedModule.description }}
+            </div>
+
+            <div v-if="selectedModule && selectedModule.encounters.length" class="flex flex-col gap-2">
+              <div
+                v-for="group in encounterGroups"
+                :key="group.act"
+                class="flex flex-col gap-1"
+              >
+                <div
+                  v-if="group.act"
+                  class="text-xs font-semibold text-base-content/50 uppercase tracking-wide"
+                >
+                  {{ group.act }}
+                </div>
+                <div
+                  v-for="enc in group.encounters"
+                  :key="enc.id"
+                  class="flex items-start justify-between gap-2 p-2 rounded bg-base-200/50"
+                >
+                  <div class="flex-1 min-w-0">
+                    <div class="font-semibold text-sm truncate">{{ enc.name }}</div>
+                    <div v-if="enc.description" class="text-xs text-base-content/60">
+                      {{ enc.description }}
+                    </div>
+                    <div class="text-xs text-base-content/40 mt-0.5">
+                      <span
+                        v-for="(m, mi) in enc.monsters"
+                        :key="m.name"
+                      >{{ mi > 0 ? ', ' : '' }}{{ m.name }}<span v-if="m.quantity > 1"> x{{ m.quantity }}</span></span>
+                    </div>
+                  </div>
+                  <button
+                    v-if="addedEncounterIds.has(enc.id)"
+                    class="btn btn-ghost btn-xs btn-circle"
+                    :title="t.party.encounterAdded"
+                    disabled
+                  >
+                    <Icon icon="tabler:check" height="16" class="text-success" />
+                  </button>
+                  <button
+                    v-else
+                    class="btn btn-accent btn-xs shrink-0"
+                    @click="handleLoadEncounter(enc)"
+                  >
+                    <Icon icon="tabler:plus" height="14" />{{ t.party.addEncounter }}
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div v-else-if="selectedModule" class="text-sm text-base-content/40 italic">
+              {{ t.party.noEncounters }}
+            </div>
+          </div>
         </div>
 
         <!-- Add PC manually -->

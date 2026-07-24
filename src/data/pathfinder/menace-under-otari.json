@@ -1,0 +1,1979 @@
+{
+  "id": "menace-under-otari",
+  "name": "Menace under Otari",
+  "system": "pathfinder",
+  "enabledByDefault": false,
+  "monsters": [
+    {
+      "name": "Central Spears",
+      "hp": 1,
+      "level": 1,
+      "ac": 0,
+      "fortitude": 0,
+      "reflex": 0,
+      "will": 0,
+      "source": "Pathfinder Beginner Box",
+      "attacks": [
+        {
+          "name": "Spear",
+          "type": "melee",
+          "bonus": 10,
+          "map1": 5,
+          "map2": 0,
+          "damage": "1d8+4 piercing",
+          "damageType": "piercing"
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Spear Barrage",
+          "type": "reaction",
+          "description": "When a creature moves into any of the squares in the outlined area, the trap shoots three spears from the western wall. It makes one ranged Strike against the westernmost creature in each row."
+        }
+      ]
+    },
+    {
+      "name": "Drow Sneak",
+      "hp": 26,
+      "level": 2,
+      "ac": 19,
+      "perception": 6,
+      "fortitude": 6,
+      "reflex": 10,
+      "will": 6,
+      "speed": 30,
+      "traits": [
+        "chaotic",
+        "drow",
+        "elf",
+        "evil",
+        "humanoid"
+      ],
+      "source": "Pathfinder Beginner Box",
+      "attacks": [
+        {
+          "name": "Shortsword",
+          "type": "melee",
+          "bonus": 10,
+          "map1": 6,
+          "map2": 2,
+          "damage": "1d6+4 piercing",
+          "damageType": "piercing",
+          "traits": [
+            "agile",
+            "finesse",
+            "versatile-s"
+          ]
+        },
+        {
+          "name": "Hand Crossbow",
+          "type": "melee",
+          "bonus": 10,
+          "map1": 5,
+          "map2": 0,
+          "damage": "1d6 piercing",
+          "damageType": "piercing",
+          "traits": [
+            "reload-1"
+          ]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Light Blindness",
+          "type": "passive",
+          "description": "When first exposed to bright light, the drow Can't See until the end of their next turn. All squares are difficult terrain for them, and they take a -4 status penalty to Perception. If they try to attack a creature, the attack fails unless they succeed at a . Light doesn't blind them again for 1 hour."
+        },
+        {
+          "name": "Quick Draw",
+          "type": "action",
+          "description": "The drow rogue draws a weapon using the Interact action, then Strikes with that weapon.",
+          "actions": 1
+        },
+        {
+          "name": "Sneak Attack",
+          "type": "passive",
+          "description": "The drow sneak deals an extra 1d6 damage to creatures that have the condition."
+        }
+      ]
+    },
+    {
+      "name": "Drow Warrior",
+      "hp": 18,
+      "level": 1,
+      "ac": 18,
+      "perception": 6,
+      "fortitude": 7,
+      "reflex": 9,
+      "will": 4,
+      "speed": 30,
+      "traits": [
+        "chaotic",
+        "drow",
+        "elf",
+        "evil",
+        "humanoid"
+      ],
+      "source": "Pathfinder Beginner Box",
+      "attacks": [
+        {
+          "name": "Rapier",
+          "type": "melee",
+          "bonus": 9,
+          "map1": 4,
+          "map2": -1,
+          "damage": "1d6+2 piercing",
+          "damageType": "piercing",
+          "traits": [
+            "deadly-d8",
+            "finesse"
+          ]
+        },
+        {
+          "name": "Dagger",
+          "type": "melee",
+          "bonus": 9,
+          "map1": 5,
+          "map2": 1,
+          "damage": "1d4+2 piercing",
+          "damageType": "piercing",
+          "traits": [
+            "agile",
+            "finesse",
+            "versatile-s"
+          ]
+        },
+        {
+          "name": "Hand Crossbow",
+          "type": "melee",
+          "bonus": 9,
+          "map1": 4,
+          "map2": -1,
+          "damage": "1d6+1 piercing",
+          "damageType": "piercing",
+          "traits": [
+            "reload-1"
+          ]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Light Blindness",
+          "type": "passive",
+          "description": "When first exposed to bright light, the drow Can't See until the end of their next turn. All squares are difficult terrain for them, and they take a -4 status penalty to Perception. If they try to attack a creature, the attack fails unless they succeed at a . Light doesn't blind them again for 1 hour."
+        },
+        {
+          "name": "Quick Draw",
+          "type": "action",
+          "description": "The drow warrior draws a weapon using the Interact action, then Strikes with that weapon.",
+          "actions": 1
+        },
+        {
+          "name": "Skewer",
+          "type": "action",
+          "description": "The drow warrior Strikes with their rapier, and they gain a +1 circumstance bonus to the attack roll. If they succeed, the target takes 1d6[bleed].",
+          "actions": 2
+        }
+      ]
+    },
+    {
+      "name": "Kobold Boss Zolgran",
+      "hp": 25,
+      "level": 2,
+      "ac": 17,
+      "perception": 5,
+      "fortitude": 4,
+      "reflex": 7,
+      "will": 7,
+      "speed": 25,
+      "traits": [
+        "evil",
+        "humanoid",
+        "kobold",
+        "lawful"
+      ],
+      "source": "Pathfinder Beginner Box",
+      "attacks": [
+        {
+          "name": "Claw",
+          "type": "melee",
+          "bonus": 7,
+          "map1": 3,
+          "map2": -1,
+          "damage": "1d6-1 slashing",
+          "damageType": "slashing",
+          "traits": [
+            "agile",
+            "finesse",
+            "unarmed"
+          ]
+        },
+        {
+          "name": "Staff",
+          "type": "melee",
+          "bonus": 3,
+          "map1": -2,
+          "map2": -7,
+          "damage": "1d8-1 bludgeoning",
+          "damageType": "bludgeoning"
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Sneak Attack",
+          "type": "passive",
+          "description": "Zolgran deals an extra 1d6 damage to creatures that have the condition."
+        }
+      ]
+    },
+    {
+      "name": "Kobold Mage (Black, BB)",
+      "hp": 20,
+      "level": 2,
+      "ac": 16,
+      "perception": 5,
+      "fortitude": 5,
+      "reflex": 6,
+      "will": 7,
+      "speed": 25,
+      "traits": [
+        "humanoid",
+        "kobold"
+      ],
+      "source": "Pathfinder Beginner Box",
+      "attacks": [
+        {
+          "name": "Claw",
+          "type": "melee",
+          "bonus": 6,
+          "map1": 2,
+          "map2": -2,
+          "damage": "1d6+2 slashing",
+          "damageType": "slashing",
+          "traits": [
+            "agile",
+            "finesse",
+            "unarmed"
+          ]
+        },
+        {
+          "name": "Staff",
+          "type": "melee",
+          "bonus": 6,
+          "map1": 1,
+          "map2": -4,
+          "damage": "1d8+2 bludgeoning",
+          "damageType": "bludgeoning"
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Scamper",
+          "type": "action",
+          "description": "If the kobold is adjacent to at least one enemy, the kobold Strides up to 30 feet and gains a +2 circumstance bonus to AC against reactions triggered by this movement. The kobold must end this movement in a space that's not adjacent to any enemy.",
+          "actions": 1
+        }
+      ]
+    },
+    {
+      "name": "Kobold Mage (Blue, BB)",
+      "hp": 20,
+      "level": 2,
+      "ac": 16,
+      "perception": 5,
+      "fortitude": 5,
+      "reflex": 6,
+      "will": 7,
+      "speed": 25,
+      "traits": [
+        "humanoid",
+        "kobold"
+      ],
+      "source": "Pathfinder Beginner Box",
+      "attacks": [
+        {
+          "name": "Claw",
+          "type": "melee",
+          "bonus": 6,
+          "map1": 2,
+          "map2": -2,
+          "damage": "1d6+2 slashing",
+          "damageType": "slashing",
+          "traits": [
+            "agile",
+            "finesse",
+            "unarmed"
+          ]
+        },
+        {
+          "name": "Staff",
+          "type": "melee",
+          "bonus": 6,
+          "map1": 1,
+          "map2": -4,
+          "damage": "1d8+2 bludgeoning",
+          "damageType": "bludgeoning"
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Scamper",
+          "type": "action",
+          "description": "If the kobold is adjacent to at least one enemy, the kobold Strides up to 30 feet and gains a +2 circumstance bonus to AC against reactions triggered by this movement. The kobold must end this movement in a space that's not adjacent to any enemy.",
+          "actions": 1
+        }
+      ]
+    },
+    {
+      "name": "Kobold Mage (Green, BB)",
+      "hp": 20,
+      "level": 2,
+      "ac": 16,
+      "perception": 5,
+      "fortitude": 5,
+      "reflex": 6,
+      "will": 7,
+      "speed": 25,
+      "traits": [
+        "humanoid",
+        "kobold"
+      ],
+      "source": "Pathfinder Beginner Box",
+      "attacks": [
+        {
+          "name": "Claw",
+          "type": "melee",
+          "bonus": 6,
+          "map1": 2,
+          "map2": -2,
+          "damage": "1d6+2 slashing",
+          "damageType": "slashing",
+          "traits": [
+            "agile",
+            "finesse",
+            "unarmed"
+          ]
+        },
+        {
+          "name": "Staff",
+          "type": "melee",
+          "bonus": 6,
+          "map1": 1,
+          "map2": -4,
+          "damage": "1d8+2 bludgeoning",
+          "damageType": "bludgeoning"
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Scamper",
+          "type": "action",
+          "description": "If the kobold is adjacent to at least one enemy, the kobold Strides up to 30 feet and gains a +2 circumstance bonus to AC against reactions triggered by this movement. The kobold must end this movement in a space that's not adjacent to any enemy.",
+          "actions": 1
+        }
+      ]
+    },
+    {
+      "name": "Kobold Mage (Red, BB)",
+      "hp": 20,
+      "level": 2,
+      "ac": 16,
+      "perception": 5,
+      "fortitude": 5,
+      "reflex": 6,
+      "will": 7,
+      "speed": 25,
+      "traits": [
+        "humanoid",
+        "kobold"
+      ],
+      "source": "Pathfinder Beginner Box",
+      "attacks": [
+        {
+          "name": "Claw",
+          "type": "melee",
+          "bonus": 6,
+          "map1": 2,
+          "map2": -2,
+          "damage": "1d6+2 slashing",
+          "damageType": "slashing",
+          "traits": [
+            "agile",
+            "finesse",
+            "unarmed"
+          ]
+        },
+        {
+          "name": "Staff",
+          "type": "melee",
+          "bonus": 6,
+          "map1": 1,
+          "map2": -4,
+          "damage": "1d8+2 bludgeoning",
+          "damageType": "bludgeoning"
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Scamper",
+          "type": "action",
+          "description": "If the kobold is adjacent to at least one enemy, the kobold Strides up to 30 feet and gains a +2 circumstance bonus to AC against reactions triggered by this movement. The kobold must end this movement in a space that's not adjacent to any enemy.",
+          "actions": 1
+        }
+      ]
+    },
+    {
+      "name": "Kobold Mage (White, BB)",
+      "hp": 20,
+      "level": 2,
+      "ac": 16,
+      "perception": 5,
+      "fortitude": 5,
+      "reflex": 6,
+      "will": 7,
+      "speed": 25,
+      "traits": [
+        "humanoid",
+        "kobold"
+      ],
+      "source": "Pathfinder Beginner Box",
+      "attacks": [
+        {
+          "name": "Claw",
+          "type": "melee",
+          "bonus": 6,
+          "map1": 2,
+          "map2": -2,
+          "damage": "1d6+2 slashing",
+          "damageType": "slashing",
+          "traits": [
+            "agile",
+            "finesse",
+            "unarmed"
+          ]
+        },
+        {
+          "name": "Staff",
+          "type": "melee",
+          "bonus": 6,
+          "map1": 1,
+          "map2": -4,
+          "damage": "1d8+2 bludgeoning",
+          "damageType": "bludgeoning"
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Scamper",
+          "type": "action",
+          "description": "If the kobold is adjacent to at least one enemy, the kobold Strides up to 30 feet and gains a +2 circumstance bonus to AC against reactions triggered by this movement. The kobold must end this movement in a space that's not adjacent to any enemy.",
+          "actions": 1
+        }
+      ]
+    },
+    {
+      "name": "Kobold Scout",
+      "hp": 16,
+      "level": 1,
+      "ac": 16,
+      "perception": 8,
+      "fortitude": 5,
+      "reflex": 9,
+      "will": 6,
+      "speed": 25,
+      "traits": [
+        "humanoid",
+        "kobold"
+      ],
+      "source": "Pathfinder Beginner Box",
+      "attacks": [
+        {
+          "name": "Shortsword",
+          "type": "melee",
+          "bonus": 9,
+          "map1": 5,
+          "map2": 1,
+          "damage": "1d6 piercing",
+          "damageType": "piercing",
+          "traits": [
+            "agile",
+            "finesse",
+            "versatile-s"
+          ]
+        },
+        {
+          "name": "Crossbow",
+          "type": "melee",
+          "bonus": 9,
+          "map1": 4,
+          "map2": -1,
+          "damage": "1d8 piercing",
+          "damageType": "piercing",
+          "traits": [
+            "reload-1"
+          ]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Scamper",
+          "type": "action",
+          "description": "If the kobold is adjacent to at least one enemy, the kobold Strides up to 30 feet and gains a +2 circumstance bonus to AC against reactions triggered by this movement. The kobold must end this movement in a space that's not adjacent to any enemy.",
+          "actions": 1
+        },
+        {
+          "name": "Sneak Attack",
+          "type": "passive",
+          "description": "The kobold scout deals an extra 1d6 damage to creatures that have the condition."
+        }
+      ]
+    },
+    {
+      "name": "Kobold Trapmaster",
+      "hp": 28,
+      "level": 2,
+      "ac": 19,
+      "perception": 6,
+      "fortitude": 7,
+      "reflex": 10,
+      "will": 5,
+      "speed": 25,
+      "traits": [
+        "humanoid",
+        "kobold"
+      ],
+      "source": "Pathfinder Beginner Box",
+      "attacks": [
+        {
+          "name": "Shortsword",
+          "type": "melee",
+          "bonus": 8,
+          "map1": 4,
+          "map2": 0,
+          "damage": "1d6+2 piercing",
+          "damageType": "piercing",
+          "traits": [
+            "agile",
+            "finesse",
+            "versatile-s"
+          ]
+        },
+        {
+          "name": "Spear",
+          "type": "melee",
+          "bonus": 10,
+          "map1": 5,
+          "map2": 0,
+          "damage": "1d6+2 piercing",
+          "damageType": "piercing",
+          "traits": [
+            "thrown-20"
+          ]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Quick Trap",
+          "type": "action",
+          "description": "The kobold trapmaster deploys one of their spike traps in an adjacent square. Once this trap is deployed in a square, it deals 2d8[piercing|name:Spike Trap] damage to anyone who steps on that square and they must attempt a saving throw. A hero takes no damage on a critical success, half damage on a success, full damage on a failure, and double damage on a critical failure. These traps can be disabled with a successful check.",
+          "actions": 3
+        },
+        {
+          "name": "Scamper",
+          "type": "action",
+          "description": "If the kobold is adjacent to at least one enemy, the kobold Strides up to 30 feet and gains a +2 circumstance bonus to AC against reactions triggered by this movement. The kobold must end this movement in a space that's not adjacent to any enemy.",
+          "actions": 1
+        },
+        {
+          "name": "Sneak Attack",
+          "type": "passive",
+          "description": "The kobold trapmaster deals an extra 1d6 damage to creatures that have the condition."
+        }
+      ]
+    },
+    {
+      "name": "Kobold Warrior",
+      "hp": 7,
+      "level": -1,
+      "ac": 16,
+      "perception": 3,
+      "fortitude": 4,
+      "reflex": 7,
+      "will": 3,
+      "speed": 25,
+      "traits": [
+        "humanoid",
+        "kobold"
+      ],
+      "source": "Pathfinder Beginner Box",
+      "attacks": [
+        {
+          "name": "Spear",
+          "type": "melee",
+          "bonus": 3,
+          "map1": -2,
+          "map2": -7,
+          "damage": "1d6+1 piercing",
+          "damageType": "piercing"
+        },
+        {
+          "name": "Spear",
+          "type": "melee",
+          "bonus": 5,
+          "map1": 0,
+          "map2": -5,
+          "damage": "1d6+1 piercing",
+          "damageType": "piercing",
+          "traits": [
+            "thrown-20"
+          ]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Scamper",
+          "type": "action",
+          "description": "If the kobold is adjacent to at least one enemy, the kobold Strides up to 30 feet and gains a +2 circumstance bonus to AC against reactions triggered by this movement. The kobold must end this movement in a space that's not adjacent to any enemy.",
+          "actions": 1
+        },
+        {
+          "name": "Sneak Attack",
+          "type": "passive",
+          "description": "The kobold warrior deals an extra 1d4 damage to creatures that have the condition."
+        }
+      ]
+    },
+    {
+      "name": "Mermaid Fountain",
+      "hp": 15,
+      "level": 3,
+      "ac": 18,
+      "fortitude": 7,
+      "reflex": 5,
+      "will": 0,
+      "source": "Pathfinder Beginner Box",
+      "attacks": [
+        {
+          "name": "Spray",
+          "type": "melee",
+          "bonus": 10,
+          "map1": 5,
+          "map2": 0,
+          "damage": "2d6 bludgeoning",
+          "damageType": "bludgeoning"
+        }
+      ]
+    },
+    {
+      "name": "Envenomed Lock",
+      "hp": 24,
+      "level": 1,
+      "ac": 15,
+      "fortitude": 8,
+      "reflex": 4,
+      "will": null,
+      "source": "Pathfinder Beginner Box: Secrets of the Unlit Star",
+      "attacks": [
+        {
+          "name": "Spine",
+          "type": "melee",
+          "bonus": 13,
+          "map1": 8,
+          "map2": 3,
+          "damage": "1 piercing plus 1d6 poison",
+          "damageType": "poison"
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Spring",
+          "type": "reaction",
+          "description": "When a creature tries to unlock or Pick the Lock, a spine extends to attack that creature with a Spine attack."
+        }
+      ]
+    },
+    {
+      "name": "Falling Ceiling",
+      "hp": 10,
+      "level": 1,
+      "ac": 0,
+      "fortitude": 0,
+      "reflex": 0,
+      "will": 0,
+      "source": "Pathfinder Beginner Box",
+      "attacks": [
+        {
+          "name": "Falling Block",
+          "type": "melee",
+          "bonus": 8,
+          "map1": 3,
+          "map2": -2,
+          "damage": "1d8 bludgeoning",
+          "damageType": "bludgeoning"
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Falling Stones",
+          "type": "reaction",
+          "description": "When a creature steps on the square closest to the north door, the trap drops blocks of stone all along the hallway. It makes one ranged Strike against each creature between the two doors."
+        }
+      ]
+    },
+    {
+      "name": "Falling Shelves",
+      "hp": 0,
+      "level": 1,
+      "ac": null,
+      "fortitude": null,
+      "reflex": null,
+      "will": null,
+      "traits": [
+        "trap"
+      ],
+      "source": "Pathfinder Beginner Box: Secrets of the Unlit Star",
+      "attacks": [
+        {
+          "name": "Falling Debris",
+          "type": "melee",
+          "bonus": 8,
+          "map1": 3,
+          "map2": -2,
+          "damage": "2d4 bludgeoning",
+          "damageType": "bludgeoning"
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Topple Over",
+          "type": "reaction",
+          "description": "When a creature attempts to touch the shelves or take anything from them, they collapse, sending debris throughout the room. The trap makes one melee Strike against each creature in the room."
+        }
+      ]
+    },
+    {
+      "name": "Giant Fly",
+      "hp": 20,
+      "level": 1,
+      "ac": 16,
+      "perception": 8,
+      "fortitude": 6,
+      "reflex": 9,
+      "will": 6,
+      "speed": 20,
+      "traits": [
+        "animal"
+      ],
+      "source": "Pathfinder Beginner Box: Secrets of the Unlit Star",
+      "attacks": [
+        {
+          "name": "Mandibles",
+          "type": "melee",
+          "bonus": 8,
+          "map1": 3,
+          "map2": -2,
+          "damage": "1d6+3 piercing",
+          "damageType": "piercing"
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Avoid the Swat",
+          "type": "reaction",
+          "description": "Trigger The giant fly is targeted with a melee or ranged attack by an attacker it can see Effect The giant fly gains a +2 circumstance bonus to AC against the triggering attack. If the attack misses, the giant insect can Fly up to its fly Speed."
+        },
+        {
+          "name": "Fly Pox",
+          "type": "passive",
+          "description": "A giant fly could carry any disease, but most transmit an infection called fly pox with their bite. A character who is critically hit by a giant fly's mandibles must succeed at a saving throw or be Enfeebled 1 for 1 day."
+        }
+      ]
+    },
+    {
+      "name": "Giant Spider",
+      "hp": 16,
+      "level": 1,
+      "ac": 17,
+      "perception": 7,
+      "fortitude": 6,
+      "reflex": 9,
+      "will": 5,
+      "speed": 25,
+      "traits": [
+        "animal"
+      ],
+      "source": "Pathfinder Beginner Box: Secrets of the Unlit Star",
+      "attacks": [
+        {
+          "name": "Fangs",
+          "type": "melee",
+          "bonus": 9,
+          "map1": 4,
+          "map2": -1,
+          "damage": "1d6+2 piercing",
+          "damageType": "piercing",
+          "traits": [
+            "finesse",
+            "unarmed"
+          ]
+        },
+        {
+          "name": "Web",
+          "type": "melee",
+          "bonus": 7,
+          "map1": 2,
+          "map2": -3
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Descend on a Web",
+          "type": "action",
+          "description": "The giant spider moves straight down up to 40 feet, suspended by a web line. It can hang from the web or drop off. The distance it Descends on a Web doesn't count for falling damage. A creature can Strike the web, which has AC 20 and 8 HP. If the web is reduced to 0 HP, the spider falls.",
+          "actions": 1
+        },
+        {
+          "name": "Giant Spider Venom",
+          "type": "passive",
+          "description": "A target damaged by the spider's fangs must succeed at a save or take 1d10[poison] damage and gain the condition for 1 round."
+        },
+        {
+          "name": "Web Trap",
+          "type": "passive",
+          "description": "A creature hit by the giant spider's web Strike gets stuck to the nearest surface. It can't move until it successfully [[/act escape dc=17]]{Escapes}."
+        }
+      ]
+    },
+    {
+      "name": "Goblin Commando",
+      "hp": 18,
+      "level": 1,
+      "ac": 17,
+      "perception": 5,
+      "fortitude": 7,
+      "reflex": 8,
+      "will": 5,
+      "speed": 25,
+      "traits": [
+        "goblin",
+        "humanoid"
+      ],
+      "source": "Pathfinder Beginner Box: Secrets of the Unlit Star",
+      "attacks": [
+        {
+          "name": "Greatsword",
+          "type": "melee",
+          "bonus": 8,
+          "map1": 3,
+          "map2": -2,
+          "damage": "1d12+3 slashing",
+          "damageType": "slashing",
+          "traits": [
+            "versatile-p"
+          ]
+        },
+        {
+          "name": "Shortbow",
+          "type": "melee",
+          "bonus": 8,
+          "map1": 3,
+          "map2": -2,
+          "damage": "1d6 piercing",
+          "damageType": "piercing",
+          "traits": [
+            "deadly-d10"
+          ]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Goblin Scuttle",
+          "type": "reaction",
+          "description": "If a goblin ally ends a move action adjacent to the goblin commando, the commando can use their reaction to Step."
+        }
+      ]
+    },
+    {
+      "name": "Goblin Igniter",
+      "hp": 15,
+      "level": 1,
+      "ac": 17,
+      "perception": 4,
+      "fortitude": 5,
+      "reflex": 9,
+      "will": 4,
+      "speed": 25,
+      "traits": [
+        "goblin",
+        "humanoid"
+      ],
+      "source": "Pathfinder Beginner Box: Secrets of the Unlit Star",
+      "attacks": [
+        {
+          "name": "Torch",
+          "type": "melee",
+          "bonus": 7,
+          "map1": 2,
+          "map2": -3,
+          "damage": "1d4 bludgeoning plus 1 fire",
+          "damageType": "fire",
+          "traits": [
+            "fire"
+          ]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Goblin Scuttle",
+          "type": "reaction",
+          "description": "If a goblin ally ends a move action adjacent to the goblin igniter, the igniter can use their reaction to Step."
+        }
+      ]
+    },
+    {
+      "name": "Goblin Warrior",
+      "hp": 6,
+      "level": -1,
+      "ac": 16,
+      "perception": 2,
+      "fortitude": 5,
+      "reflex": 7,
+      "will": 3,
+      "speed": 25,
+      "traits": [
+        "goblin",
+        "humanoid"
+      ],
+      "source": "Pathfinder Beginner Box: Secrets of the Unlit Star",
+      "attacks": [
+        {
+          "name": "Shortsword",
+          "type": "melee",
+          "bonus": 7,
+          "map1": 3,
+          "map2": -1,
+          "damage": "1d6 slashing",
+          "damageType": "slashing",
+          "traits": [
+            "agile",
+            "finesse",
+            "versatile-p"
+          ]
+        },
+        {
+          "name": "Shortbow",
+          "type": "melee",
+          "bonus": 7,
+          "map1": 2,
+          "map2": -3,
+          "damage": "1d6 piercing",
+          "damageType": "piercing",
+          "traits": [
+            "deadly-d10"
+          ]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Goblin Scuttle",
+          "type": "reaction",
+          "description": "If a goblin ally ends a move action adjacent to the goblin warrior, the warrior can use their reaction to Step."
+        }
+      ]
+    },
+    {
+      "name": "Hidden Pit",
+      "hp": 12,
+      "level": 0,
+      "ac": 10,
+      "fortitude": 1,
+      "reflex": 1,
+      "will": null,
+      "source": "Pathfinder Beginner Box: Secrets of the Unlit Star",
+      "abilities": [
+        {
+          "name": "Pitfall",
+          "type": "reaction",
+          "description": "If a creature walks onto the trap door, that creature falls in unless it succeeds at a [[/act grab-an-edge dc=16]]{Reflex} save to grab hold of the edge. The pit is 20 feet deep, dealing 10[bludgeoning|options:fall-damage] damage to anyone who falls to the bottom."
+        }
+      ]
+    },
+    {
+      "name": "Horned Dragon (Juvenile, BB)",
+      "hp": 60,
+      "level": 4,
+      "ac": 20,
+      "perception": 11,
+      "fortitude": 11,
+      "reflex": 11,
+      "will": 9,
+      "speed": 25,
+      "traits": [
+        "amphibious",
+        "dragon"
+      ],
+      "source": "Pathfinder Beginner Box: Secrets of the Unlit Star",
+      "attacks": [
+        {
+          "name": "Jaws",
+          "type": "melee",
+          "bonus": 14,
+          "map1": 9,
+          "map2": 4,
+          "damage": "2d6+4 piercing plus 1d4 poison",
+          "damageType": "poison",
+          "traits": [
+            "poison",
+            "unarmed"
+          ]
+        },
+        {
+          "name": "Claw",
+          "type": "melee",
+          "bonus": 14,
+          "map1": 10,
+          "map2": 6,
+          "damage": "2d6+4 slashing",
+          "damageType": "slashing",
+          "traits": [
+            "agile",
+            "unarmed"
+          ]
+        },
+        {
+          "name": "Tail",
+          "type": "melee",
+          "bonus": 12,
+          "map1": 7,
+          "map2": 2,
+          "damage": "1d8+4 bludgeoning",
+          "damageType": "bludgeoning",
+          "traits": [
+            "reach-10"
+          ]
+        },
+        {
+          "name": "Horn",
+          "type": "melee",
+          "bonus": 12,
+          "map1": 7,
+          "map2": 2,
+          "damage": "1d12+4 bludgeoning",
+          "damageType": "bludgeoning",
+          "traits": [
+            "unarmed"
+          ]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Twisting Tail",
+          "type": "reaction",
+          "description": "When a creature within 10 feet uses a move action or leaves a square during a move action it's using, the dragon can use their reaction to make a tail Strike at the creature with a –2 penalty. If it hits, the creature stops moving in the square it was in when the dragon used this reaction."
+        },
+        {
+          "name": "Draconic Frenzy",
+          "type": "action",
+          "description": "The dragon makes two claw Strikes and one tail Strike in any order.",
+          "actions": 2
+        },
+        {
+          "name": "Draconic Momentum",
+          "type": "passive",
+          "description": "When the dragon gets a critical success on a Strike, they recharge their Poison Breath."
+        },
+        {
+          "name": "Poison Breath",
+          "type": "action",
+          "description": "The dragon breathes a toxic cloud that deals 5d6[poison|options:area-damage] damage in a . Each creature in the area must attempt a save. The dragon can't use Poison Breath again for [[/gmr 1d4 #Recharge Poison Breath]]{1d4 rounds}.",
+          "actions": 2
+        }
+      ]
+    },
+    {
+      "name": "Lukahn",
+      "hp": 40,
+      "level": 4,
+      "ac": 20,
+      "perception": 10,
+      "fortitude": 8,
+      "reflex": 14,
+      "will": 12,
+      "speed": 0,
+      "traits": [
+        "incorporeal",
+        "undead",
+        "unholy"
+      ],
+      "source": "Pathfinder Beginner Box: Secrets of the Unlit Star",
+      "attacks": [
+        {
+          "name": "Shadow Hand",
+          "type": "melee",
+          "bonus": 10,
+          "map1": 5,
+          "map2": 0,
+          "damage": "2d6+3 void",
+          "damageType": "void",
+          "traits": [
+            "finesse",
+            "magical"
+          ]
+        },
+        {
+          "name": "Shadow Blast",
+          "type": "melee",
+          "bonus": 8,
+          "map1": 3,
+          "map2": -2,
+          "damage": "2d6 void",
+          "damageType": "void",
+          "traits": [
+            "magical"
+          ]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Incorporeal",
+          "type": "passive",
+          "description": "Lukahn has no body and can pass through physical objects, though he can't end his turn inside one. Most checks that use Strength and require a body, such as and , don't work against Lukahn, and he can't use them."
+        },
+        {
+          "name": "Light Vulnerability",
+          "type": "passive",
+          "description": "Attacks against Lukahn are treated as magical if he or the weapon being used against him is in light."
+        },
+        {
+          "name": "Shadow Veil",
+          "type": "reaction",
+          "description": "Trigger Lukahn is targeted by a melee attack Effect Lukahn gains a +2 circumstance bonus to AC against the triggering attack."
+        }
+      ]
+    },
+    {
+      "name": "Magnetic Skink",
+      "hp": 10,
+      "level": 0,
+      "ac": 15,
+      "perception": 8,
+      "fortitude": 8,
+      "reflex": 5,
+      "will": 2,
+      "speed": 30,
+      "traits": [
+        "animal"
+      ],
+      "source": "Pathfinder Beginner Box: Secrets of the Unlit Star",
+      "attacks": [
+        {
+          "name": "Jaws",
+          "type": "melee",
+          "bonus": 5,
+          "map1": 0,
+          "map2": -5,
+          "damage": "1d6 piercing",
+          "damageType": "piercing"
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Uncanny Climber",
+          "type": "passive",
+          "description": "A magnetic skink's feet allow it to climb virtually any surface, no matter how slick or sheer. If a skink attempts an Athletics check to [[/act climb]] and critically fails, it gets a failure instead."
+        },
+        {
+          "name": "Launch Metal",
+          "type": "action",
+          "description": "The skink repulses the metal attached to its body in all directions, dealing 2d6[bludgeoning|options:area-damage] damage ( save) to all creatures adjacent to the skink. The skink can't use Launch Metal again for [[/gmr 1d4 #Recharge Launch Metal]]{1d4 rounds}.",
+          "actions": 2
+        },
+        {
+          "name": "Unsteadying Magnetism",
+          "type": "action",
+          "description": "The skink amplifies its magnetic field and tries to pull the metal away from a creature within 20 feet. If that creature is wearing metal armor or holding a metal item, they must attempt a save. On a failure, that creature is until the start of the skink's next turn.",
+          "actions": 1
+        }
+      ]
+    },
+    {
+      "name": "Minotaur Hunter",
+      "hp": 70,
+      "level": 4,
+      "ac": 20,
+      "perception": 12,
+      "fortitude": 13,
+      "reflex": 8,
+      "will": 10,
+      "speed": 25,
+      "traits": [
+        "beast",
+        "humanoid"
+      ],
+      "source": "Pathfinder Beginner Box: Secrets of the Unlit Star",
+      "attacks": [
+        {
+          "name": "Greataxe",
+          "type": "melee",
+          "bonus": 14,
+          "map1": 9,
+          "map2": 4,
+          "damage": "1d12+8 slashing",
+          "damageType": "slashing",
+          "traits": [
+            "reach-10",
+            "sweep"
+          ]
+        },
+        {
+          "name": "Horn",
+          "type": "melee",
+          "bonus": 14,
+          "map1": 9,
+          "map2": 4,
+          "damage": "1d8+8 piercing",
+          "damageType": "piercing",
+          "traits": [
+            "unarmed"
+          ]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Perfect Orienteering",
+          "type": "passive",
+          "description": "A minotaur automatically critically succeeds on Survival checks to [[/act sense-direction]] or [[/act track]]"
+        },
+        {
+          "name": "Axe Swipe",
+          "type": "action",
+          "description": "The minotaur makes two Strikes with their greataxe against two adjacent enemies, both of whom are within their reach. The second attack uses the same multiple attack penalty as the first, but attacks they make after this take a –10 multiple attack penalty.",
+          "actions": 2
+        },
+        {
+          "name": "Powerful Charge",
+          "type": "action",
+          "description": "The minotaur Strides twice, then makes a horn Strike. If they moved at least 20 feet from their starting position, the Strike's damage is increased to 2d8+10.",
+          "actions": 2
+        }
+      ]
+    },
+    {
+      "name": "Orc Commander",
+      "hp": 32,
+      "level": 2,
+      "ac": 19,
+      "perception": 8,
+      "fortitude": 7,
+      "reflex": 6,
+      "will": 7,
+      "speed": 25,
+      "traits": [
+        "humanoid",
+        "orc"
+      ],
+      "source": "Pathfinder Beginner Box: Secrets of the Unlit Star",
+      "attacks": [
+        {
+          "name": "Maul",
+          "type": "melee",
+          "bonus": 10,
+          "map1": 5,
+          "map2": 0,
+          "damage": "1d12+4 bludgeoning",
+          "damageType": "bludgeoning",
+          "traits": [
+            "shove"
+          ]
+        },
+        {
+          "name": "Fist",
+          "type": "melee",
+          "bonus": 10,
+          "map1": 6,
+          "map2": 2,
+          "damage": "1d4+4 bludgeoning",
+          "damageType": "bludgeoning",
+          "traits": [
+            "agile",
+            "nonlethal",
+            "unarmed"
+          ]
+        },
+        {
+          "name": "Javelin",
+          "type": "melee",
+          "bonus": 8,
+          "map1": 3,
+          "map2": -2,
+          "damage": "1d6+4 piercing",
+          "damageType": "piercing",
+          "traits": [
+            "thrown-30"
+          ]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Ferocity",
+          "type": "reaction",
+          "description": "When the orc is reduced to 0 Hit Points, they can use their reaction to remain conscious with 1 Hit Point, but they gain the Wounded 1 condition (or increases the wounded value by 1 if they already have that condition). The orc can't use this ability at wounded 3."
+        },
+        {
+          "name": "Battle Cry",
+          "type": "action",
+          "description": "Bellowing mightily, the commander gives themself and all orc allies within 60 feet who can hear them a +1 status bonus to attack rolls and damage rolls until the start of the orc commander's next turn.",
+          "actions": 1
+        }
+      ]
+    },
+    {
+      "name": "Orc Scrapper",
+      "hp": 18,
+      "level": 0,
+      "ac": 14,
+      "perception": 5,
+      "fortitude": 5,
+      "reflex": 4,
+      "will": 2,
+      "speed": 25,
+      "traits": [
+        "humanoid",
+        "orc"
+      ],
+      "source": "Pathfinder Beginner Box: Secrets of the Unlit Star",
+      "attacks": [
+        {
+          "name": "Battle Axe",
+          "type": "melee",
+          "bonus": 7,
+          "map1": 3,
+          "map2": -1,
+          "damage": "1d8+3 piercing",
+          "damageType": "piercing",
+          "traits": [
+            "agile",
+            "disarm"
+          ]
+        },
+        {
+          "name": "Fist",
+          "type": "melee",
+          "bonus": 7,
+          "map1": 3,
+          "map2": -1,
+          "damage": "1d4+3 bludgeoning",
+          "damageType": "bludgeoning",
+          "traits": [
+            "agile",
+            "nonlethal",
+            "unarmed"
+          ]
+        },
+        {
+          "name": "Javelin",
+          "type": "melee",
+          "bonus": 4,
+          "map1": -1,
+          "map2": -6,
+          "damage": "1d6+3 piercing",
+          "damageType": "piercing",
+          "traits": [
+            "thrown-30"
+          ]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Ferocity",
+          "type": "reaction",
+          "description": "When the orc is reduced to 0 Hit Points, they can use their reaction to remain conscious with 1 Hit Point, but they gain the Wounded 1 condition (or increases the wounded value by 1 if they already have that condition). The orc can't use this ability at wounded 3."
+        }
+      ]
+    },
+    {
+      "name": "Orc Veteran",
+      "hp": 23,
+      "level": 1,
+      "ac": 18,
+      "perception": 6,
+      "fortitude": 8,
+      "reflex": 7,
+      "will": 4,
+      "speed": 25,
+      "traits": [
+        "humanoid",
+        "orc"
+      ],
+      "source": "Pathfinder Beginner Box: Secrets of the Unlit Star",
+      "attacks": [
+        {
+          "name": "Battle Axe",
+          "type": "melee",
+          "bonus": 7,
+          "map1": 2,
+          "map2": -3,
+          "damage": "1d8+4 slashing",
+          "damageType": "slashing",
+          "traits": [
+            "sweep"
+          ]
+        },
+        {
+          "name": "Shortsword",
+          "type": "melee",
+          "bonus": 7,
+          "map1": 3,
+          "map2": -1,
+          "damage": "1d6+4 slashing",
+          "damageType": "slashing",
+          "traits": [
+            "agile",
+            "versatile-p"
+          ]
+        },
+        {
+          "name": "Fist",
+          "type": "melee",
+          "bonus": 7,
+          "map1": 3,
+          "map2": -1,
+          "damage": "1d4+4 bludgeoning",
+          "damageType": "bludgeoning",
+          "traits": [
+            "agile",
+            "nonlethal",
+            "unarmed"
+          ]
+        },
+        {
+          "name": "Javelin",
+          "type": "melee",
+          "bonus": 5,
+          "map1": 0,
+          "map2": -5,
+          "damage": "1d6+4 piercing",
+          "damageType": "piercing",
+          "traits": [
+            "thrown-30"
+          ]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Ferocity",
+          "type": "reaction",
+          "description": "When the orc is reduced to 0 Hit Points, they can use their reaction to remain conscious with 1 Hit Point, but they gain the Wounded 1 condition (or increases the wounded value by 1 if they already have that condition). The orc can't use this ability at wounded 3."
+        }
+      ]
+    },
+    {
+      "name": "Scythe Blades",
+      "hp": 44,
+      "level": 4,
+      "ac": 21,
+      "fortitude": 12,
+      "reflex": 8,
+      "will": null,
+      "source": "Pathfinder Beginner Box: Secrets of the Unlit Star",
+      "attacks": [
+        {
+          "name": "Scythe",
+          "type": "melee",
+          "bonus": 17,
+          "map1": 12,
+          "map2": 7,
+          "damage": "2d12+4 slashing",
+          "damageType": "slashing"
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Falling Scythes",
+          "type": "reaction",
+          "description": "When the trip wire is pulled or severed, both blades swing down, each one attacking all creatures under the ceiling grooves. The trap makes a melee attack with each blade with +17 to each attack roll. There's no multiple attack penalty on these attacks. On a hit, a blade deals 2d12+4 slashing damage. On a critical hit, the damage is doubled plus 6 extra damage."
+        }
+      ]
+    },
+    {
+      "name": "Shadow Bat",
+      "hp": 40,
+      "level": 2,
+      "ac": 18,
+      "perception": 11,
+      "fortitude": 9,
+      "reflex": 8,
+      "will": 7,
+      "speed": 15,
+      "traits": [
+        "beast"
+      ],
+      "source": "Pathfinder Beginner Box: Secrets of the Unlit Star",
+      "attacks": [
+        {
+          "name": "Fangs",
+          "type": "melee",
+          "bonus": 9,
+          "map1": 4,
+          "map2": -1,
+          "damage": "1d10+4 piercing",
+          "damageType": "piercing",
+          "traits": [
+            "unarmed"
+          ]
+        },
+        {
+          "name": "Wing",
+          "type": "melee",
+          "bonus": 9,
+          "map1": 5,
+          "map2": 1,
+          "damage": "1d6+4 slashing",
+          "damageType": "slashing",
+          "traits": [
+            "agile",
+            "unarmed"
+          ]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Echolocation",
+          "type": "passive",
+          "description": "The bat can \"see\" using its hearing at the listed range, allowing it to function just as well in darkness."
+        },
+        {
+          "name": "Screeching Gust",
+          "type": "action",
+          "description": "The shadow bat flaps its wings and lets out a mighty screech, creating a cone of tearing winds and piercing sound. All creatures in a take 3d6[sonic|options:area-damage] damage, with a saving throw. Creatures that fail are pushed backwards 10 feet by the wind. Using its wings in this way exhausts the shadow bat, causing it to fall harmlessly to the ground immediately after using this ability and preventing it from taking flight or using Screeching Gust again for [[/gmr 1d4 #Recharge Screeching Gust]]{1d4 rounds}.",
+          "actions": 2
+        }
+      ]
+    },
+    {
+      "name": "Shadow Gargoyle",
+      "hp": 25,
+      "level": 3,
+      "ac": 19,
+      "perception": 8,
+      "fortitude": 11,
+      "reflex": 8,
+      "will": 8,
+      "speed": 25,
+      "traits": [
+        "beast",
+        "earth"
+      ],
+      "source": "Pathfinder Beginner Box: Secrets of the Unlit Star",
+      "attacks": [
+        {
+          "name": "Jaws",
+          "type": "melee",
+          "bonus": 11,
+          "map1": 6,
+          "map2": 1,
+          "damage": "2d8 piercing",
+          "damageType": "piercing",
+          "traits": [
+            "unarmed"
+          ]
+        },
+        {
+          "name": "Claw",
+          "type": "melee",
+          "bonus": 11,
+          "map1": 7,
+          "map2": 3,
+          "damage": "2d6 slashing",
+          "damageType": "slashing",
+          "traits": [
+            "agile",
+            "unarmed"
+          ]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Clawed Feet",
+          "type": "reaction",
+          "description": "If the gargoyle is flying and a creature moves into an adjacent square below them, the gargoyle can use their reaction to make a claw Strike against that creature."
+        }
+      ]
+    },
+    {
+      "name": "Shadow Priest",
+      "hp": 40,
+      "level": 4,
+      "ac": 20,
+      "perception": 10,
+      "fortitude": 8,
+      "reflex": 14,
+      "will": 12,
+      "speed": 0,
+      "traits": [
+        "incorporeal",
+        "undead",
+        "unholy"
+      ],
+      "source": "Pathfinder Beginner Box: Secrets of the Unlit Star",
+      "attacks": [
+        {
+          "name": "Shadow Hand",
+          "type": "melee",
+          "bonus": 10,
+          "map1": 5,
+          "map2": 0,
+          "damage": "2d6+3 void",
+          "damageType": "void",
+          "traits": [
+            "finesse",
+            "magical"
+          ]
+        },
+        {
+          "name": "Shadow Blast",
+          "type": "melee",
+          "bonus": 8,
+          "map1": 3,
+          "map2": -2,
+          "damage": "2d6 void",
+          "damageType": "void",
+          "traits": [
+            "magical"
+          ]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Incorporeal",
+          "type": "passive",
+          "description": "The shadow priest has no body and can pass through physical objects, though they can't end their turn inside one. Most checks that use Strength and require a body, such as and , don't work against the shadow priest, and the shadow priest can't use them."
+        },
+        {
+          "name": "Light Vulnerability",
+          "type": "passive",
+          "description": "Attacks against the shadow priest are treated as magical if the shadow priest or the weapon being used against them is in light."
+        },
+        {
+          "name": "Shadow Veil",
+          "type": "reaction",
+          "description": "If the shadow priest is targeted by a melee attack, they can use their reaction to gain a +2 circumstance bonus to AC against the triggering attack."
+        }
+      ]
+    },
+    {
+      "name": "Shadow Twigjack",
+      "hp": 35,
+      "level": 2,
+      "ac": 17,
+      "perception": 7,
+      "fortitude": 7,
+      "reflex": 9,
+      "will": 5,
+      "speed": 25,
+      "traits": [
+        "fey",
+        "plant",
+        "wood"
+      ],
+      "source": "Pathfinder Beginner Box: Secrets of the Unlit Star",
+      "attacks": [
+        {
+          "name": "Claw",
+          "type": "melee",
+          "bonus": 9,
+          "map1": 5,
+          "map2": 1,
+          "damage": "1d10+2 slashing",
+          "damageType": "slashing",
+          "traits": [
+            "agile",
+            "finesse",
+            "reach-0",
+            "unarmed"
+          ]
+        },
+        {
+          "name": "Splinter",
+          "type": "melee",
+          "bonus": 9,
+          "map1": 4,
+          "map2": -1,
+          "damage": "1d6+2 piercing",
+          "damageType": "piercing",
+          "traits": [
+            "deadly-d6"
+          ]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Bramble Jump",
+          "type": "action",
+          "description": "When the twigjack is in undergrowth, it can instantly teleport to a square of undergrowth within 60 feet. This movement doesn't trigger reactions.",
+          "actions": 3
+        },
+        {
+          "name": "Splinter Spray",
+          "type": "action",
+          "description": "The twigjack sprays a barrage of splinters and brambles from its body that deals 3d6[piercing|options:area-damage] damage in a . Each creature in the area must attempt a save. The twigjack can't use Splinter Spray again for [[/gmr 1d4 #Recharge Splinter Spray]]{1d4 rounds}.",
+          "actions": 2
+        }
+      ]
+    },
+    {
+      "name": "Shadow Walls",
+      "hp": 15,
+      "level": 4,
+      "ac": 18,
+      "fortitude": 7,
+      "reflex": 5,
+      "will": null,
+      "source": "Pathfinder Beginner Box: Secrets of the Unlit Star",
+      "attacks": [
+        {
+          "name": "Shadow Lash",
+          "type": "melee",
+          "bonus": 10,
+          "map1": 5,
+          "map2": 0,
+          "damage": "2d6 void",
+          "damageType": "void"
+        }
+      ]
+    },
+    {
+      "name": "Shulzara",
+      "hp": 30,
+      "level": 2,
+      "ac": 17,
+      "perception": 8,
+      "fortitude": 9,
+      "reflex": 6,
+      "will": 8,
+      "speed": 25,
+      "traits": [
+        "amphibious",
+        "hag",
+        "humanoid"
+      ],
+      "source": "Pathfinder Beginner Box: Secrets of the Unlit Star",
+      "attacks": [
+        {
+          "name": "Claw",
+          "type": "melee",
+          "bonus": 10,
+          "map1": 6,
+          "map2": 2,
+          "damage": "1d10+2 slashing",
+          "damageType": "slashing",
+          "traits": [
+            "agile",
+            "magical",
+            "unarmed"
+          ]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Slithering Steps",
+          "type": "passive",
+          "description": "Shulzara is not affected by difficult terrain due to water."
+        }
+      ]
+    },
+    {
+      "name": "Slamming Door",
+      "hp": 20,
+      "level": 1,
+      "ac": 16,
+      "fortitude": 10,
+      "reflex": 2,
+      "will": null,
+      "source": "Pathfinder Beginner Box: Secrets of the Unlit Star",
+      "abilities": [
+        {
+          "name": "Slam Shut",
+          "type": "reaction",
+          "description": "When pressure is placed on a floor tile, the door falls, closing off the hallway. The stone slab deals 3d8[bludgeoning] damage to anyone beneath or adjacent to the slab when it drops and pushes them out of its space in a random direction. A creature that succeeds at a save takes no damage and rolls out of the way in a random direction. On a critical success, they roll out of the way and can choose which direction. Lifting the fallen slab requires a successful check. Hitting the floor panels triggers the trap. The slab uses the same AC and saves as the trap, but it has Hardness 12, HP 48 (BT 24)."
+        }
+      ]
+    },
+    {
+      "name": "Spear Launcher",
+      "hp": 32,
+      "level": 2,
+      "ac": 18,
+      "fortitude": 11,
+      "reflex": 3,
+      "will": null,
+      "source": "Pathfinder Beginner Box: Secrets of the Unlit Star",
+      "attacks": [
+        {
+          "name": "Spear",
+          "type": "melee",
+          "bonus": 14,
+          "map1": 9,
+          "map2": 4,
+          "damage": "2d6+6 piercing",
+          "damageType": "piercing"
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Spear",
+          "type": "reaction",
+          "description": "When pressure is applied to the floor tile, the trap shoots a spear, making an attack against the creature or object on the floor tile. The trap makes a ranged Spear attack."
+        }
+      ]
+    },
+    {
+      "name": "Umbral Gnome Rockwarden",
+      "hp": 63,
+      "level": 5,
+      "ac": 22,
+      "perception": 14,
+      "fortitude": 12,
+      "reflex": 9,
+      "will": 14,
+      "speed": 15,
+      "traits": [
+        "gnome",
+        "humanoid"
+      ],
+      "source": "Pathfinder Beginner Box: Secrets of the Unlit Star",
+      "attacks": [
+        {
+          "name": "Sling",
+          "type": "melee",
+          "bonus": 11,
+          "map1": 6,
+          "map2": 1,
+          "damage": "1d6 bludgeoning",
+          "damageType": "bludgeoning",
+          "traits": [
+            "propulsive",
+            "reload-1"
+          ]
+        },
+        {
+          "name": "Scythe",
+          "type": "melee",
+          "bonus": 7,
+          "map1": 2,
+          "map2": -3,
+          "damage": "1d10 slashing",
+          "damageType": "slashing",
+          "traits": [
+            "deadly-d10",
+            "trip"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Umbral Gnome Scout",
+      "hp": 18,
+      "level": 1,
+      "ac": 17,
+      "perception": 7,
+      "fortitude": 7,
+      "reflex": 9,
+      "will": 5,
+      "speed": 20,
+      "traits": [
+        "gnome",
+        "humanoid"
+      ],
+      "source": "Pathfinder Beginner Box: Secrets of the Unlit Star",
+      "attacks": [
+        {
+          "name": "Sling",
+          "type": "melee",
+          "bonus": 9,
+          "map1": 4,
+          "map2": -1,
+          "damage": "1d6+1 bludgeoning",
+          "damageType": "bludgeoning",
+          "traits": [
+            "propulsive",
+            "reload-1"
+          ]
+        },
+        {
+          "name": "Sickle",
+          "type": "melee",
+          "bonus": 7,
+          "map1": 3,
+          "map2": -1,
+          "damage": "1d4+2 slashing",
+          "damageType": "slashing",
+          "traits": [
+            "agile",
+            "finesse",
+            "trip"
+          ]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Hidden Movement",
+          "type": "passive",
+          "description": "If the umbral gnome scout starts their turn or to a creature, that creature is against the umbral gnome scout's attacks until the end of the turn."
+        }
+      ]
+    },
+    {
+      "name": "Umbral Gnome Warrior",
+      "hp": 34,
+      "level": 2,
+      "ac": 18,
+      "perception": 7,
+      "fortitude": 9,
+      "reflex": 8,
+      "will": 5,
+      "speed": 20,
+      "traits": [
+        "gnome",
+        "humanoid"
+      ],
+      "source": "Pathfinder Beginner Box: Secrets of the Unlit Star",
+      "attacks": [
+        {
+          "name": "Spear",
+          "type": "melee",
+          "bonus": 10,
+          "map1": 5,
+          "map2": 0,
+          "damage": "1d6+4 piercing",
+          "damageType": "piercing"
+        },
+        {
+          "name": "Heavy Crossbow",
+          "type": "melee",
+          "bonus": 8,
+          "map1": 3,
+          "map2": -2,
+          "damage": "1d10 piercing",
+          "damageType": "piercing",
+          "traits": [
+            "reload-2"
+          ]
+        }
+      ],
+      "abilities": [
+        {
+          "name": "Raise a Shield",
+          "type": "action",
+          "description": "The umbral gnome warrior lifts up their shield to get a +2 circumstance bonus to AC until the start of their next turn.",
+          "actions": 1
+        },
+        {
+          "name": "Shield Block",
+          "type": "reaction",
+          "description": "If the umbral gnome warrior has their shield raised, they can spend your reaction to block a physical attack. Reduce the amount of damage by 5, but then the umbral gnome warrior and their shield both take any damage leftover. This might break or destroy the shield. The shield has a maximum of 20 Hit Points."
+        }
+      ]
+    }
+  ]
+}

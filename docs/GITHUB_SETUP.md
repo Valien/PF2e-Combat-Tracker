@@ -50,7 +50,7 @@ When you're ready to announce your first stable version:
 ```markdown
 # 🎉 Initial Release
 
-First stable release of Pathfinder 2e Initiative Tracker!
+First stable release of Pathfinder 2e Combat Tracker!
 
 ## ✨ Features
 
@@ -185,7 +185,7 @@ Once everything is polished, share it with the community:
 
 ### Example Post:
 ```
-Title: [Tool] Free, Open-Source Initiative Tracker for Pathfinder 2e
+Title: [Tool] Free, Open-Source Combat Tracker for Pathfinder 2e
 
 Body:
 I've built a free initiative tracker specifically for PF2e with features like:

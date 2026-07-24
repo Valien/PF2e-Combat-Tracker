@@ -26,6 +26,7 @@ import {
 } from 'reka-ui'
 import { getEnabledMonsters, useConditions, type Monster } from './db.ts'
 import { useEnabledContentSources } from './composables/useSettings'
+import type { ModuleEncounter } from './modules.ts'
 
 const { t, lang } = useTranslations()
 const conditions = computed(() => useConditions(lang.value))
@@ -54,6 +55,7 @@ const emit = defineEmits<{
   (e: 'endCombat'): void
   (e: 'newPc', name: string, HP: number, initiative: number, extras?: Record<string, unknown>): void
   (e: 'removeFromRoster', name: string): void
+  (e: 'loadEncounter', encounter: ModuleEncounter): void
 }>()
 
 const props = defineProps<{
@@ -247,23 +249,6 @@ async function copyPlayerUrl(): Promise<void> {
         <Icon icon="tabler:flag" height="18" />{{ t.endCombat.title }}
       </button>
 
-      <a v-if="!isOnlineMode" class="btn btn-neutral btn-sm" href="?view=player">
-        <Icon icon="tabler:users-group" height="18" />{{ t.dm_actions.playerView }}
-      </a>
-      <button v-else class="btn btn-neutral btn-sm relative" @click="copyPlayerUrl">
-        <Icon icon="tabler:users-group" height="18" />{{ t.dm_actions.copyPlayerUrl }}
-        <div
-          v-if="showCopiedMessage"
-          class="absolute -top-8 left-1/2 -translate-x-1/2 badge badge-success badge-sm"
-        >
-          {{ t.dm_actions.copiedToClipboard }}
-        </div>
-      </button>
-
-      <button class="btn btn-neutral btn-sm" @click="isSettingsOpen = true">
-        <Icon icon="tabler:settings" height="18" />{{ t.options.settings }}
-      </button>
-
       <!-- Add Monster/NPC Popover -->
       <PopoverRoot
         :open="isNewCombatantPopoverOpen"
@@ -276,7 +261,7 @@ async function copyPlayerUrl(): Promise<void> {
         </PopoverTrigger>
         <PopoverPortal>
           <PopoverContent class="card w-96 bg-base-300 card-md shadow-xl z-50" role="dialog">
-            <div class="card-body">
+            <form class="card-body" @submit.prevent="addCombatant">
               <div class="grid grid-cols-3 items-center gap-3">
                 <Label for="newName" class="text-sm">{{ t.table.name }}</Label>
                 <input
@@ -314,7 +299,7 @@ async function copyPlayerUrl(): Promise<void> {
                 </NumberFieldRoot>
               </div>
               <div class="flex justify-end gap-2">
-                <button class="btn btn-ghost btn-sm" @click="changeNewVisibility">
+                <button type="button" tabindex="-1" class="btn btn-ghost btn-sm" @click="changeNewVisibility">
                   <Icon v-if="newVisibility === Visibility.Full" icon="tabler:eye" height="18" />
                   <Icon
                     v-else-if="newVisibility === Visibility.Half"
@@ -323,18 +308,37 @@ async function copyPlayerUrl(): Promise<void> {
                   />
                   <Icon v-else icon="tabler:eye-closed" height="18" />
                 </button>
-                <button class="btn btn-ghost btn-sm" @click="clearNewCombatant">
+                <button type="button" tabindex="-1" class="btn btn-ghost btn-sm" @click="clearNewCombatant">
                   <Icon icon="tabler:eraser" height="18" />{{ t.dm_actions.clear }}
                 </button>
-                <button class="btn btn-accent btn-sm" @click="addCombatant">
+                <button type="submit" tabindex="5" class="btn btn-accent btn-sm">
                   <Icon icon="tabler:plus" height="18" />{{ t.dm_actions.add }}
                 </button>
               </div>
-            </div>
+            </form>
             <PopoverArrow class="fill-base-300" />
           </PopoverContent>
         </PopoverPortal>
       </PopoverRoot>
+
+      <div class="ml-auto flex gap-2">
+        <a v-if="!isOnlineMode" class="btn btn-neutral btn-sm" href="?view=player">
+          <Icon icon="tabler:users-group" height="18" />{{ t.dm_actions.playerView }}
+        </a>
+        <button v-else class="btn btn-neutral btn-sm relative" @click="copyPlayerUrl">
+          <Icon icon="tabler:users-group" height="18" />{{ t.dm_actions.copyPlayerUrl }}
+          <div
+            v-if="showCopiedMessage"
+            class="absolute -top-8 left-1/2 -translate-x-1/2 badge badge-success badge-sm"
+          >
+            {{ t.dm_actions.copiedToClipboard }}
+          </div>
+        </button>
+
+        <button class="btn btn-neutral btn-sm" @click="isSettingsOpen = true">
+          <Icon icon="tabler:settings" height="18" />{{ t.options.settings }}
+        </button>
+      </div>
     </div>
 
     <!-- Card Grid -->
@@ -428,6 +432,7 @@ async function copyPlayerUrl(): Promise<void> {
       @rename-party="(oldName: string, newName: string) => $emit('renameParty', oldName, newName)"
       @delete-party="(name: string) => $emit('deleteParty', name)"
       @remove-from-roster="(name: string) => $emit('removeFromRoster', name)"
+      @load-encounter="(encounter: ModuleEncounter) => $emit('loadEncounter', encounter)"
     />
   </div>
 </template>

@@ -13,6 +13,9 @@ import {
   readStoredSchemaVersion,
   writeCurrentSchemaVersion,
 } from './serialization.ts'
+import { getEnabledMonsters, type Monster } from './db.ts'
+import { useEnabledContentSources } from './composables/useSettings'
+import { getModules, type ModuleEncounter } from './modules.ts'
 
 // Check URL for session ID and view mode
 const urlParams = new URLSearchParams(window.location.search)
@@ -530,6 +533,93 @@ function newPc(
   )
   saveParty()
 }
+
+/**
+ * Colors for naming multiple copies of the same monster.
+ * Mirrors DMView's getCombatantName pattern.
+ */
+const COLORS = ['Red', 'Green', 'Blue', 'Purple', 'Pink', 'Brown']
+
+function getColorName(i: number): string {
+  if (i < COLORS.length) return COLORS[i]
+  return String(i)
+}
+
+/**
+ * Loads an encounter from an adventure module. Appends monsters to the
+ * current combatants list (does NOT replace — parties/PCs stay in place).
+ * Looks up each monster's stat block from enabled content sources, falling
+ * back to a bare NPC entry if no bestiary match is found. Auto-enables the
+ * module's required sources so monster lookups succeed.
+ *
+ * Called from the PartyManager's Modules section via DMView.
+ */
+function loadEncounter(encounter: ModuleEncounter): void {
+  const module = getModules().find((m) =>
+    m.encounters.some((e) => e.id === encounter.id),
+  )
+
+  const enabled = useEnabledContentSources()
+  if (module) {
+    const current = new Set(enabled.value)
+    let changed = false
+    for (const src of module.requiredSources) {
+      if (!current.has(src)) {
+        current.add(src)
+        changed = true
+      }
+    }
+    if (changed) enabled.value = [...current]
+  }
+
+  const monsterList = getEnabledMonsters(enabled.value)
+
+  for (const enc of encounter.monsters) {
+    const monster: Monster | undefined = monsterList.find((m) => m.name === enc.name)
+    const qty = enc.quantity || 1
+
+    for (let i = 0; i < qty; i++) {
+      const combatantName = qty === 1 ? enc.name : `${enc.name} (${getColorName(i)})`
+      const extras = monster
+        ? {
+            type: 'monster' as const,
+            level: monster.level,
+            ac: monster.ac,
+            perception: monster.perception,
+            fortitude: monster.fortitude,
+            reflex: monster.reflex,
+            will: monster.will,
+            speed: monster.speed,
+            resistances: monster.resistances,
+            weaknesses: monster.weaknesses,
+            immunities: monster.immunities,
+            traits: monster.traits,
+            family: monster.family,
+            source: monster.source,
+            attacks: monster.attacks,
+            abilities: monster.abilities,
+            aonUrl: monster.url,
+          }
+        : {
+            type: 'monster' as const,
+          }
+
+      combatants.value.push(
+        new Combatant(
+          combatantName,
+          monster?.hp ?? 1,
+          1,
+          monster?.hp ?? 1,
+          [],
+          Visibility.Half,
+          0,
+          0,
+          extras as any,
+        ),
+      )
+    }
+  }
+}
 </script>
 
 <template>
@@ -561,6 +651,7 @@ function newPc(
     @end-combat="endCombat"
     @new-pc="newPc"
     @remove-from-roster="removeFromRoster"
+    @load-encounter="loadEncounter"
   />
   <PlayerView v-else :turn="turn" :round="round" :combatants="orderedCombatants" />
 </template>

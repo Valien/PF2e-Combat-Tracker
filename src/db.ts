@@ -91,6 +91,7 @@ import shadowsAtSundownData from './data/pathfinder/shadows-at-sundown.json'
 import nightOfTheGrayDeathData from './data/pathfinder/night-of-the-gray-death.json'
 import theEnmityCycleData from './data/pathfinder/the-enmity-cycle.json'
 import rusthengeData from './data/pathfinder/rusthenge.json'
+import menaceUnderOtariData from './data/pathfinder/menace-under-otari.json'
 
 // Pathfinder 2e - Sourcebooks
 import travelGuideData from './data/pathfinder/travel-guide.json'
@@ -315,6 +316,7 @@ const contentSources: ContentSource[] = [
   nightOfTheGrayDeathData as ContentSource,
   theEnmityCycleData as ContentSource,
   rusthengeData as ContentSource,
+  menaceUnderOtariData as ContentSource,
 
   // Pathfinder 2e - Unknown/Mixed Sources
   unknownData as ContentSource,

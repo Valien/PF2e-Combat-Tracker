@@ -1,4 +1,4 @@
-# Contributing to Pathfinder 2e Initiative Tracker
+# Contributing to Pathfinder 2e Combat Tracker
 
 Thank you for your interest in contributing! This document provides guidelines and instructions for contributing to this project.
 

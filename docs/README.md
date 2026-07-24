@@ -1,6 +1,6 @@
 # Documentation
 
-This directory contains all project documentation for the Pathfinder 2e Initiative Tracker.
+This directory contains all project documentation for the Pathfinder 2e Combat Tracker.
 
 ## Contents
 

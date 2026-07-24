@@ -18,7 +18,7 @@ The initiative tracker has two modes:
 
 1. Go to [Firebase Console](https://console.firebase.google.com/)
 2. Click **"Add project"**
-3. Enter a project name (e.g., "Initiative Tracker")
+3. Enter a project name (e.g., "Combat Tracker")
 4. Disable Google Analytics (not needed for this project)
 5. Click **"Create project"**
 
@@ -59,7 +59,7 @@ The initiative tracker has two modes:
 2. Select **"Project settings"**
 3. Scroll down to **"Your apps"**
 4. Click the **"</>"** (Web) icon to add a web app
-5. Give it a nickname (e.g., "Initiative Tracker Web")
+5. Give it a nickname (e.g., "Combat Tracker Web")
 6. **Don't** check "Also set up Firebase Hosting"
 7. Click **"Register app"**
 8. Copy the `firebaseConfig` object shown

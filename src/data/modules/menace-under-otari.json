@@ -1,0 +1,135 @@
+{
+  "id": "menace-under-otari",
+  "name": "Menace under Otari",
+  "description": "A Beginner Box adventure. Goblins, kobolds, and shadow creatures threaten the town of Otari from beneath.",
+  "requiredSources": ["menace-under-otari"],
+  "encounters": [
+    {
+      "id": "cellar-spiders",
+      "name": "Cellar Spiders",
+      "description": "Giant spiders lurk in the general store's cellar.",
+      "act": "Act 1: The Cellar",
+      "monsters": [
+        { "name": "Giant Spider", "quantity": 2 }
+      ]
+    },
+    {
+      "id": "cellar-vermin",
+      "name": "Cellar Vermin",
+      "description": "A giant fly and a spider feed on the cellar stores.",
+      "act": "Act 1: The Cellar",
+      "monsters": [
+        { "name": "Giant Fly", "quantity": 1 },
+        { "name": "Giant Spider", "quantity": 1 }
+      ]
+    },
+    {
+      "id": "goblin-ambush",
+      "name": "Goblin Ambush",
+      "description": "Goblins ambush intruders at the cavern entrance.",
+      "act": "Act 2: Kobold Caverns",
+      "monsters": [
+        { "name": "Goblin Warrior", "quantity": 2 },
+        { "name": "Goblin Igniter", "quantity": 1 }
+      ]
+    },
+    {
+      "id": "kobold-guards",
+      "name": "Kobold Guards",
+      "description": "Kobold warriors and a scout guard the tunnels.",
+      "act": "Act 2: Kobold Caverns",
+      "monsters": [
+        { "name": "Kobold Warrior", "quantity": 2 },
+        { "name": "Kobold Scout", "quantity": 1 }
+      ]
+    },
+    {
+      "id": "kobold-traps",
+      "name": "Kobold Traps",
+      "description": "A kobold trapmaster and warriors defend a trapped corridor.",
+      "act": "Act 2: Kobold Caverns",
+      "monsters": [
+        { "name": "Kobold Trapmaster", "quantity": 1 },
+        { "name": "Kobold Warrior", "quantity": 2 }
+      ]
+    },
+    {
+      "id": "kobold-boss",
+      "name": "Boss Zolgran",
+      "description": "Kobold Boss Zolgran and a kobold mage defend their lair.",
+      "act": "Act 2: Kobold Caverns",
+      "monsters": [
+        { "name": "Kobold Boss Zolgran", "quantity": 1 },
+        { "name": "Kobold Mage (Red, BB)", "quantity": 1 }
+      ]
+    },
+    {
+      "id": "umbral-guards",
+      "name": "Umbral Gnome Guards",
+      "description": "Umbral gnome warriors and a scout guard the shadow passage.",
+      "act": "Act 3: Shadow Depths",
+      "monsters": [
+        { "name": "Umbral Gnome Warrior", "quantity": 2 },
+        { "name": "Umbral Gnome Scout", "quantity": 1 }
+      ]
+    },
+    {
+      "id": "shadow-creatures",
+      "name": "Shadow Creatures",
+      "description": "A shadow twigjack and shadow bat haunt the depths.",
+      "act": "Act 3: Shadow Depths",
+      "monsters": [
+        { "name": "Shadow Twigjack", "quantity": 1 },
+        { "name": "Shadow Bat", "quantity": 1 }
+      ]
+    },
+    {
+      "id": "drow-guards",
+      "name": "Drow Guards",
+      "description": "Drow warriors and a sneak patrol the shadow tunnels.",
+      "act": "Act 3: Shadow Depths",
+      "monsters": [
+        { "name": "Drow Warrior", "quantity": 2 },
+        { "name": "Drow Sneak", "quantity": 1 }
+      ]
+    },
+    {
+      "id": "shadow-priest",
+      "name": "Shadow Priest",
+      "description": "A shadow priest and gargoyle guard the final approach.",
+      "act": "Act 3: Shadow Depths",
+      "monsters": [
+        { "name": "Shadow Priest", "quantity": 1 },
+        { "name": "Shadow Gargoyle", "quantity": 1 }
+      ]
+    },
+    {
+      "id": "orc-camp",
+      "name": "Orc Camp",
+      "description": "Orc veterans and their commander hold the lower caves.",
+      "act": "Act 4: Finale",
+      "monsters": [
+        { "name": "Orc Veteran", "quantity": 2 },
+        { "name": "Orc Commander", "quantity": 1 }
+      ]
+    },
+    {
+      "id": "minotaur",
+      "name": "Minotaur Hunter",
+      "description": "A minotaur hunter stalks the final caverns.",
+      "act": "Act 4: Finale",
+      "monsters": [
+        { "name": "Minotaur Hunter", "quantity": 1 }
+      ]
+    },
+    {
+      "id": "horned-dragon",
+      "name": "Horned Dragon",
+      "description": "A juvenile horned dragon—the final boss—guards the deepest treasure.",
+      "act": "Act 4: Finale",
+      "monsters": [
+        { "name": "Horned Dragon (Juvenile, BB)", "quantity": 1 }
+      ]
+    }
+  ]
+}

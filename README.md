@@ -1,11 +1,11 @@
-# 🎲 Pathfinder 2e Initiative Tracker
+# 🎲 Pathfinder 2e Combat Tracker
 
 ![CI](https://github.com/Valforte/initiative-tracker/workflows/CI/badge.svg)
 ![License](https://img.shields.io/github/license/Valforte/initiative-tracker)
 ![Version](https://img.shields.io/github/package-json/v/Valforte/initiative-tracker)
 ![Stars](https://img.shields.io/github/stars/Valforte/initiative-tracker?style=social)
 
-A modern, themeable initiative tracker for Pathfinder 2e combat encounters with separate DM and player views. Built with Vue 3, TypeScript, and Tailwind CSS.
+A modern, themeable combat tracker for Pathfinder 2e encounters with separate DM and player views. Built with Vue 3, TypeScript, and Tailwind CSS.
 
 **[🎮 Live Demo](https://valforte.github.io/Initiative-Tracker/)**
 

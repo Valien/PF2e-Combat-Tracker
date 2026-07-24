@@ -13,7 +13,7 @@ This guide will get you up and running with online multiplayer in 15 minutes.
 
 1. Go to https://console.firebase.google.com/
 2. Click "Add project"
-3. Name it (e.g., "Initiative Tracker")
+3. Name it (e.g., "Combat Tracker")
 4. Disable Google Analytics
 5. Click "Create project"
 
@@ -50,7 +50,7 @@ This guide will get you up and running with online multiplayer in 15 minutes.
 1. Click the gear icon ⚙️ → "Project settings"
 2. Scroll to "Your apps"
 3. Click "</>" (Web icon)
-4. Name it "Initiative Tracker Web"
+4. Name it "Combat Tracker Web"
 5. Click "Register app"
 6. **Copy the firebaseConfig object**
 
