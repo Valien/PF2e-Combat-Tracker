@@ -489,31 +489,123 @@ describe('Combatant - action/reaction tracking', () => {
     expect(combatant.reactionUsed).toBe(false)
   })
 
-  it('should reset actions and reaction via resetActions()', () => {
+  it('should reset actions, strikes, and reaction via resetActions()', () => {
     const combatant = new Combatant('Goblin', 6, 2)
     combatant.useAction()
-    combatant.useAction()
+    combatant.useStrike()
     combatant.toggleReaction()
     expect(combatant.actionsUsed).toBe(2)
+    expect(combatant.strikesUsed).toBe(1)
     expect(combatant.reactionUsed).toBe(true)
     combatant.resetActions()
     expect(combatant.actionsUsed).toBe(0)
+    expect(combatant.strikesUsed).toBe(0)
     expect(combatant.reactionUsed).toBe(false)
   })
 
-  it('should accept actionsUsed/reactionUsed via constructor extras', () => {
+  it('should accept actionsUsed/reactionUsed/strikesUsed via constructor extras', () => {
     const combatant = new Combatant('Goblin', 6, 2, 6, [], Visibility.Half, 0, 0, {
       type: 'monster',
       actionsUsed: 2,
       reactionUsed: true,
+      strikesUsed: 1,
     })
     expect(combatant.actionsUsed).toBe(2)
     expect(combatant.reactionUsed).toBe(true)
+    expect(combatant.strikesUsed).toBe(1)
   })
 })
 
-describe('Schema migration (v2 -> v3)', () => {
-  it('should add v3 action fields with defaults to v2 combatants', () => {
+describe('Combatant - strike tracking (MAP)', () => {
+  it('should initialize with 0 strikes used', () => {
+    const combatant = new Combatant('Goblin', 6, 2)
+    expect(combatant.strikesUsed).toBe(0)
+  })
+
+  it('should increment both actionsUsed and strikesUsed via useStrike()', () => {
+    const combatant = new Combatant('Goblin', 6, 2)
+    combatant.useStrike()
+    expect(combatant.actionsUsed).toBe(1)
+    expect(combatant.strikesUsed).toBe(1)
+    combatant.useStrike()
+    expect(combatant.actionsUsed).toBe(2)
+    expect(combatant.strikesUsed).toBe(2)
+  })
+
+  it('should clamp both counters at max (default 3 per PF2e RAW)', () => {
+    const combatant = new Combatant('Goblin', 6, 2)
+    combatant.useStrike()
+    combatant.useStrike()
+    combatant.useStrike()
+    combatant.useStrike() // 4th should not go past 3
+    expect(combatant.actionsUsed).toBe(3)
+    expect(combatant.strikesUsed).toBe(3)
+  })
+
+  it('should respect a custom max for effects like Haste (4 actions)', () => {
+    const combatant = new Combatant('Hasted Fighter', 25, 10)
+    combatant.useStrike(4)
+    combatant.useStrike(4)
+    combatant.useStrike(4)
+    combatant.useStrike(4)
+    expect(combatant.actionsUsed).toBe(4)
+    expect(combatant.strikesUsed).toBe(4)
+    combatant.useStrike(4) // 5th should clamp at 4
+    expect(combatant.actionsUsed).toBe(4)
+    expect(combatant.strikesUsed).toBe(4)
+  })
+
+  it('should let useAction() consume an action pip without accruing MAP (stride/step/demoralize)', () => {
+    const combatant = new Combatant('Goblin', 6, 2)
+    combatant.useAction()
+    expect(combatant.actionsUsed).toBe(1)
+    expect(combatant.strikesUsed).toBe(0) // move action does NOT count toward MAP
+    // A subsequent strike should land at the 2nd-strike MAP tier
+    combatant.useStrike()
+    expect(combatant.actionsUsed).toBe(2)
+    expect(combatant.strikesUsed).toBe(1)
+  })
+
+  it('should decrement both counters via unuseStrike()', () => {
+    const combatant = new Combatant('Goblin', 6, 2)
+    combatant.useStrike()
+    combatant.useStrike()
+    expect(combatant.actionsUsed).toBe(2)
+    expect(combatant.strikesUsed).toBe(2)
+    combatant.unuseStrike()
+    expect(combatant.actionsUsed).toBe(1)
+    expect(combatant.strikesUsed).toBe(1)
+  })
+
+  it('should not go below 0 via unuseStrike()', () => {
+    const combatant = new Combatant('Goblin', 6, 2)
+    combatant.unuseStrike()
+    expect(combatant.actionsUsed).toBe(0)
+    expect(combatant.strikesUsed).toBe(0)
+  })
+
+  it('should clamp strikesUsed to actionsUsed when unuseAction() backs off a total action', () => {
+    // Scenario: used Strike (1 action, 1 strike) then Stride (1 action, 0 strikes).
+    // actionsUsed=2, strikesUsed=1. DM right-clicks the 2nd action pip to unuse it.
+    // unuseAction must drop actionsUsed to 1 and clamp strikesUsed to 1 (unchanged,
+    // since 1 <= 1). A second unuseAction drops actionsUsed to 0 and must clamp
+    // strikesUsed down to 0 to preserve the invariant.
+    const combatant = new Combatant('Goblin', 6, 2)
+    combatant.useStrike()
+    combatant.useAction()
+    expect(combatant.actionsUsed).toBe(2)
+    expect(combatant.strikesUsed).toBe(1)
+    combatant.unuseAction()
+    expect(combatant.actionsUsed).toBe(1)
+    expect(combatant.strikesUsed).toBe(1)
+    combatant.unuseAction()
+    expect(combatant.actionsUsed).toBe(0)
+    expect(combatant.strikesUsed).toBe(0) // clamped down to preserve invariant
+  })
+})
+
+describe('Schema migration (v2 -> v4)', () => {
+  it('should add v3 + v4 action fields with defaults to v2 combatants', () => {
     const v2Combatant = {
       name: 'Goblin',
       totalHP: 6,
@@ -530,6 +622,7 @@ describe('Schema migration (v2 -> v3)', () => {
     const migrated = migrateCombatants(2, [v2Combatant])
     expect(migrated[0].actionsUsed).toBe(0)
     expect(migrated[0].reactionUsed).toBe(false)
+    expect(migrated[0].strikesUsed).toBe(0)
     // v2 fields should be preserved
     expect(migrated[0].type).toBe('monster')
     expect(migrated[0].level).toBe(1)
@@ -557,8 +650,8 @@ describe('Schema migration (v2 -> v3)', () => {
     expect(migrated[0].reactionUsed).toBe(true)
   })
 
-  it('should deserialize v3 combatant with action fields into class instance', () => {
-    const v3Combatant = {
+  it('should deserialize v4 combatant with action/strike fields into class instance', () => {
+    const v4Combatant = {
       name: 'Goblin',
       totalHP: 6,
       initiative: 2,
@@ -569,18 +662,20 @@ describe('Schema migration (v2 -> v3)', () => {
       maxTempHP: 0,
       type: 'monster',
       level: 1,
-      actionsUsed: 1,
+      actionsUsed: 2,
       reactionUsed: true,
+      strikesUsed: 1,
     }
-    const migrated = migrateCombatants(3, [v3Combatant])
+    const migrated = migrateCombatants(4, [v4Combatant])
     const combatant = deserializeCombatant(migrated[0])
     expect(combatant).toBeInstanceOf(Combatant)
-    expect(combatant.actionsUsed).toBe(1)
+    expect(combatant.actionsUsed).toBe(2)
     expect(combatant.reactionUsed).toBe(true)
+    expect(combatant.strikesUsed).toBe(1)
   })
 
-  it('should be a no-op when stored version equals current (v3)', () => {
-    const v3Combatant = {
+  it('should be a no-op when stored version equals current (v4)', () => {
+    const v4Combatant = {
       name: 'X',
       totalHP: 10,
       initiative: 1,
@@ -592,12 +687,13 @@ describe('Schema migration (v2 -> v3)', () => {
       type: 'pc',
       actionsUsed: 0,
       reactionUsed: false,
+      strikesUsed: 0,
     }
-    const migrated = migrateCombatants(CURRENT_SCHEMA_VERSION, [v3Combatant])
-    expect(migrated[0]).toEqual(v3Combatant)
+    const migrated = migrateCombatants(CURRENT_SCHEMA_VERSION, [v4Combatant])
+    expect(migrated[0]).toEqual(v4Combatant)
   })
 
-  it('should migrate v1 all the way to v3 in one pass', () => {
+  it('should migrate v1 all the way to v4 in one pass', () => {
     const v1Combatant = {
       name: 'Amiri',
       totalHP: 22,
@@ -614,8 +710,56 @@ describe('Schema migration (v2 -> v3)', () => {
     // v3 fields
     expect(migrated[0].actionsUsed).toBe(0)
     expect(migrated[0].reactionUsed).toBe(false)
+    // v4 fields
+    expect(migrated[0].strikesUsed).toBe(0)
     // Condition got v2 upgrade
     expect(migrated[0].conditions[0].duration).toBeNull()
+  })
+
+  it('should add strikesUsed with a safe default when migrating v3 -> v4', () => {
+    // v3 state already has actionsUsed but no strikesUsed. The v4 migrator
+    // cannot tell which actions were Attack-trait after the fact, so it
+    // defaults strikesUsed to 0 (full MAP on the next strike). Existing
+    // actionsUsed/reactionUsed must be preserved.
+    const v3Combatant = {
+      name: 'Goblin',
+      totalHP: 6,
+      initiative: 2,
+      currentHP: 6,
+      conditions: [],
+      visibility: 1,
+      tempHP: 0,
+      maxTempHP: 0,
+      type: 'monster',
+      actionsUsed: 2,
+      reactionUsed: true,
+    }
+    const migrated = migrateCombatants(3, [v3Combatant])
+    expect(migrated[0].strikesUsed).toBe(0)
+    expect(migrated[0].actionsUsed).toBe(2) // preserved
+    expect(migrated[0].reactionUsed).toBe(true) // preserved
+  })
+
+  it('should preserve an existing strikesUsed when migrating v3 -> v4', () => {
+    // If a v3 combatant already has strikesUsed (e.g. written by a newer
+    // build but stored under the old version key), the migrator must not
+    // clobber it.
+    const v3Combatant = {
+      name: 'Boss',
+      totalHP: 50,
+      initiative: 5,
+      currentHP: 30,
+      conditions: [],
+      visibility: 2,
+      tempHP: 0,
+      maxTempHP: 0,
+      type: 'monster',
+      actionsUsed: 2,
+      reactionUsed: false,
+      strikesUsed: 2,
+    }
+    const migrated = migrateCombatants(3, [v3Combatant])
+    expect(migrated[0].strikesUsed).toBe(2)
   })
 })
 
@@ -700,10 +844,10 @@ describe('deserializeCombatantArray - party roster (save/load round-trip)', () =
     expect(loaded[1].totalHP).toBe(18)
   })
 
-  it('should fall back to default combatants when raw is empty/null', () => {
-    expect(deserializeCombatantArray(null)).toHaveLength(4)
-    expect(deserializeCombatantArray(undefined)).toHaveLength(4)
-    expect(deserializeCombatantArray('')).toHaveLength(4)
+  it('should return an empty array when raw is empty/null (no implicit party seeding)', () => {
+    expect(deserializeCombatantArray(null)).toHaveLength(0)
+    expect(deserializeCombatantArray(undefined)).toHaveLength(0)
+    expect(deserializeCombatantArray('')).toHaveLength(0)
   })
 })
 
@@ -740,23 +884,23 @@ describe('getStrikeBonus - MAP computation', () => {
     // map1/map2 missing — should compute from bonus with agile penalty
   }
 
-  it('should return full bonus when 0 actions used (1st Strike)', () => {
+  it('should return full bonus when 0 strikes used (1st Strike)', () => {
     expect(getStrikeBonus(nonAgileAttack, 0)).toBe(17)
     expect(getStrikeBonus(agileAttack, 0)).toBe(15)
     expect(getStrikeBonus(noMapAttack, 0)).toBe(10)
   })
 
-  it('should return map1 when 1 action used (2nd Strike)', () => {
+  it('should return map1 when 1 strike used (2nd Strike)', () => {
     expect(getStrikeBonus(nonAgileAttack, 1)).toBe(12)
     expect(getStrikeBonus(agileAttack, 1)).toBe(11)
   })
 
-  it('should return map2 when 2 actions used (3rd Strike)', () => {
+  it('should return map2 when 2 strikes used (3rd Strike)', () => {
     expect(getStrikeBonus(nonAgileAttack, 2)).toBe(7)
     expect(getStrikeBonus(agileAttack, 2)).toBe(7)
   })
 
-  it('should stay at map2 when 3 actions used (pips prevent a 4th)', () => {
+  it('should stay at map2 when 3 strikes used (pips prevent a 4th)', () => {
     expect(getStrikeBonus(nonAgileAttack, 3)).toBe(7)
     expect(getStrikeBonus(agileAttack, 3)).toBe(7)
   })

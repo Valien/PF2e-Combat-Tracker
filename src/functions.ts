@@ -175,6 +175,14 @@ class Combatant {
   actionsUsed: number
   reactionUsed: boolean
 
+  // --- Schema v4 field (strike counter for Multiple Attack Penalty) ---
+  // PF2e RAW: MAP accrues only from actions with the attack trait
+  // (Strike, Grapple, Trip, Shove, Disarm), not from move actions like
+  // Stride/Step or skill actions like Demoralize. `strikesUsed` tracks
+  // attack-trait actions spent this turn and feeds `getStrikeBonus`.
+  // Invariant: strikesUsed <= actionsUsed (every strike is also an action).
+  strikesUsed: number
+
   constructor(
     name: string,
     totalHP: number,
@@ -205,6 +213,7 @@ class Combatant {
       notes?: string
       actionsUsed?: number
       reactionUsed?: boolean
+      strikesUsed?: number
     } = {},
   ) {
     this.name = name
@@ -239,6 +248,9 @@ class Combatant {
     // Schema v3 fields
     this.actionsUsed = extras.actionsUsed ?? 0
     this.reactionUsed = extras.reactionUsed ?? false
+
+    // Schema v4 field
+    this.strikesUsed = extras.strikesUsed ?? 0
   }
 
   /**
@@ -395,10 +407,42 @@ class Combatant {
 
   /**
    * Un-spends one action (corrects a mis-click).
-   * Clamps at 0; never goes negative.
+   * Clamps at 0; never goes negative. Also clamps `strikesUsed` to the new
+   * `actionsUsed` so the invariant `strikesUsed <= actionsUsed` holds
+   * (backing off a total action may invalidate a previously-counted strike).
    */
   public unuseAction() {
     if (this.actionsUsed > 0) this.actionsUsed--
+    if (this.strikesUsed > this.actionsUsed) this.strikesUsed = this.actionsUsed
+  }
+
+  /**
+   * Marks one attack-trait action (Strike, Grapple, Trip, Shove, Disarm)
+   * as spent this turn. Increments both `actionsUsed` and `strikesUsed`,
+   * clamping both at `max` (default 3 per PF2e RAW). Use this for any
+   * action that carries the Attack trait and therefore accrues MAP.
+   *
+   * Non-attack actions (Stride, Step, Stand, Demoralize) should call
+   * `useAction()` instead so they consume an action pip without advancing
+   * the Multiple Attack Penalty tier.
+   * @param max - Maximum actions allowed this turn (default: 3)
+   */
+  public useStrike(max: number = Combatant.MAX_ACTIONS_PER_TURN) {
+    if (this.actionsUsed < max) {
+      this.actionsUsed++
+      this.strikesUsed++
+    }
+  }
+
+  /**
+   * Un-spends one attack-trait action (corrects a mis-click on a Strike
+   * or attack-trait skill action). Decrements both counters, clamped at 0.
+   */
+  public unuseStrike() {
+    if (this.strikesUsed > 0) {
+      this.strikesUsed--
+      if (this.actionsUsed > 0) this.actionsUsed--
+    }
   }
 
   /**
@@ -410,12 +454,13 @@ class Combatant {
   }
 
   /**
-   * Clears action/reaction tracking. Called when the creature regains
+   * Clears action/reaction/strike tracking. Called when the creature regains
    * actions at the start of its own turn (typically via `nextTurn`/`prevTurn`
    * in `InitiativeManager`), and on `endCombat` / `reset`.
    */
   public resetActions() {
     this.actionsUsed = 0
+    this.strikesUsed = 0
     this.reactionUsed = false
   }
 
@@ -472,29 +517,6 @@ class Combatant {
 }
 
 /**
- * Default combatants for Pathfinder 2e
- * Uses iconic characters from the Core Rulebook
- */
-const defaultPathfinderCombatants: Array<Combatant> = [
-  new Combatant('Amiri', 22, 4, 22, [], Visibility.Full, 0, 0), // Iconic Barbarian
-  new Combatant('Lini', 18, 3, 18, [], Visibility.Full, 0, 0), // Iconic Druid
-  new Combatant('Ezren', 16, 2, 16, [], Visibility.Full, 0, 0), // Iconic Wizard
-  new Combatant('Kyra', 16, 1, 16, [], Visibility.Full, 0, 0), // Iconic Cleric
-]
-
-/**
- * Get default combatants for a new combat
- * Creates fresh copies of combatants to avoid shared references
- * @returns Array of default combatants
- */
-function getDefaultCombatants(): Array<Combatant> {
-  // Create fresh copies of combatants to avoid shared references
-  return defaultPathfinderCombatants.map(
-    (c) => new Combatant(c.name, c.totalHP, c.initiative, c.currentHP, [], c.visibility, 0, 0),
-  )
-}
-
-/**
  * Determines if a hex color should be considered "dark"
  * Used to decide whether to use light or dark text on colored condition badges
  * Uses weighted RGB formula (ITU-R BT.601)
@@ -520,33 +542,37 @@ function isAgile(attack: MonsterAttack): boolean {
 }
 
 /**
- * Returns the attack bonus at a given MAP tier based on actions used.
+ * Returns the attack bonus at a given MAP tier based on strikes used.
  *
- * PF2e Multiple Attack Penalty (MAP):
- *   0 actions used   → full bonus (1st Strike)
- *   1 action used    → map1 (2nd Strike): -5 (or -4 if agile)
- *   2+ actions used  → map2 (3rd Strike): -10 (or -8 if agile)
- *   3+ actions used  → same as map2 (no further penalty; pips prevent a 4th)
+ * PF2e Multiple Attack Penalty (MAP) accrues only from actions with the
+ * attack trait (Strike, Grapple, Trip, Shove, Disarm) — not from move
+ * actions like Stride/Step or skill actions like Demoralize. The caller
+ * passes `combatant.strikesUsed` (not `actionsUsed`).
+ *
+ *   0 strikes used   → full bonus (1st Strike)
+ *   1 strike used    → map1 (2nd Strike): -5 (or -4 if agile)
+ *   2+ strikes used  → map2 (3rd Strike): -10 (or -8 if agile)
+ *   3+ strikes used  → same as map2 (no further penalty; pips prevent a 4th)
  *
  * Uses `attack.map1`/`attack.map2` when present (AoN-scraped data includes
  * them when the stat block shows `[+12/+7/+2]` format). Falls back to
  * computing from `attack.bonus - penalty` when missing.
  *
  * @param attack - The monster attack (must have `bonus`)
- * @param actionsUsed - How many actions the creature has already spent this turn
+ * @param strikesUsed - How many attack-trait actions the creature has spent this turn
  * @returns The modified attack roll bonus at the current MAP tier
  */
-function getStrikeBonus(attack: MonsterAttack, actionsUsed: number): number {
-  if (actionsUsed <= 0) return attack.bonus
+function getStrikeBonus(attack: MonsterAttack, strikesUsed: number): number {
+  if (strikesUsed <= 0) return attack.bonus
 
   const agile = isAgile(attack)
   const penalty1 = agile ? 4 : 5
   const penalty2 = agile ? 8 : 10
 
-  if (actionsUsed === 1) {
+  if (strikesUsed === 1) {
     return attack.map1 ?? attack.bonus - penalty1
   }
-  // 2+ actions used → map2 tier (3rd Strike)
+  // 2+ strikes used → map2 tier (3rd Strike)
   return attack.map2 ?? attack.bonus - penalty2
 }
 
@@ -557,7 +583,6 @@ export {
   Visibility,
   Condition,
   Combatant,
-  getDefaultCombatants,
   type CombatantType,
   type DamageModifier,
   type MonsterAttack,

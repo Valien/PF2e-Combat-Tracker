@@ -327,7 +327,7 @@ const hasStatBlock = computed(
           class="btn btn-ghost btn-xs"
           :disabled="combatant.actionsUsed >= 3"
           :title="`${t.card.trip} (Athletics vs Reflex DC)`"
-          @click="combatant.useAction()"
+          @click="combatant.useStrike()"
         >
           <Icon icon="tabler:arrow-back-up" height="14" />
           <span class="text-xs">{{ t.card.trip }}</span>
@@ -336,7 +336,7 @@ const hasStatBlock = computed(
           class="btn btn-ghost btn-xs"
           :disabled="combatant.actionsUsed >= 3"
           :title="`${t.card.grapple} (Athletics vs Fortitude DC)`"
-          @click="combatant.useAction()"
+          @click="combatant.useStrike()"
         >
           <Icon icon="tabler:hand-grab" height="14" />
           <span class="text-xs">{{ t.card.grapple }}</span>
@@ -345,7 +345,7 @@ const hasStatBlock = computed(
           class="btn btn-ghost btn-xs"
           :disabled="combatant.actionsUsed >= 3"
           :title="`${t.card.shove} (Athletics vs Fortitude DC)`"
-          @click="combatant.useAction()"
+          @click="combatant.useStrike()"
         >
           <Icon icon="tabler:arrows-horizontal" height="14" />
           <span class="text-xs">{{ t.card.shove }}</span>
@@ -354,7 +354,7 @@ const hasStatBlock = computed(
           class="btn btn-ghost btn-xs"
           :disabled="combatant.actionsUsed >= 3"
           :title="`${t.card.disarm} (Athletics vs Reflex DC)`"
-          @click="combatant.useAction()"
+          @click="combatant.useStrike()"
         >
           <Icon icon="tabler:hand-stop" height="14" />
           <span class="text-xs">{{ t.card.disarm }}</span>
@@ -499,12 +499,12 @@ const hasStatBlock = computed(
                 :disabled="combatant.actionsUsed >= 3"
                 :class="{ 'opacity-50': combatant.actionsUsed >= 3 }"
                 :title="isAgile(atk) ? t.card.agile : undefined"
-                @click="combatant.useAction()"
+                @click="combatant.useStrike()"
               >
                 <Icon icon="tabler:sword" height="14" />
                 <span class="font-semibold">{{ atk.name }}</span>
                 <span class="badge badge-xs badge-neutral font-mono">
-                  +{{ getStrikeBonus(atk, combatant.actionsUsed) }}
+                  +{{ getStrikeBonus(atk, combatant.strikesUsed) }}
                 </span>
                 <span v-if="isAgile(atk)" class="badge badge-xs badge-ghost">{{
                   t.card.agile

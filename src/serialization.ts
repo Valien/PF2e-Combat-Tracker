@@ -1,4 +1,4 @@
-import { Combatant, Condition, getDefaultCombatants } from './functions.ts'
+import { Combatant, Condition } from './functions.ts'
 import { useStorage } from '@vueuse/core'
 
 // Schema version for the persisted combat state.
@@ -16,7 +16,12 @@ import { useStorage } from '@vueuse/core'
 // v3: Combatant gains actionsUsed/reactionUsed (per-turn action tracking for
 //     the DM quick-tally buttons). Defaults to 0/false so v1/v2 state
 //     rehydrates with full actions available on the next turn.
-export const CURRENT_SCHEMA_VERSION = 3
+// v4: Combatant gains strikesUsed (per-turn strike counter that feeds the
+//     Multiple Attack Penalty). MAP accrues only from Attack-trait actions
+//     (Strike, Grapple, Trip, Shove, Disarm), not move/skill actions, so
+//     strikesUsed is tracked separately from actionsUsed. Defaults to 0 so
+//     v1/v2/v3 state rehydrates at full MAP on the next strike.
+export const CURRENT_SCHEMA_VERSION = 4
 
 // Storage key holding the version number of the persisted combat state.
 export const SCHEMA_VERSION_KEY = 'schemaVersion'
@@ -65,6 +70,18 @@ const migrations: Record<number, MigrationFn> = {
       ...raw,
       actionsUsed: raw.actionsUsed ?? 0,
       reactionUsed: raw.reactionUsed ?? false,
+    }
+  },
+  4: (raw) => {
+    // v3 -> v4: add strikesUsed with a safe default. Existing v3 state may
+    // have an `actionsUsed` count that includes strikes, but we cannot
+    // reliably tell which actions were Attack-trait after the fact, so we
+    // default strikesUsed to 0 (full MAP on the next strike). The DM can
+    // re-tally with a click if needed; this is strictly better than
+    // over-counting strikes (which would understate the displayed bonus).
+    return {
+      ...raw,
+      strikesUsed: raw.strikesUsed ?? 0,
     }
   },
 }
@@ -128,13 +145,15 @@ export function deserializeCombatant(combatant: any): Combatant {
       notes: combatant.notes,
       actionsUsed: combatant.actionsUsed,
       reactionUsed: combatant.reactionUsed,
+      strikesUsed: combatant.strikesUsed,
     },
   )
 }
 
 /**
  * Rehydrate an array of plain combatant objects into class instances.
- * Falls back to default combatants if the input is missing/empty.
+ * Returns an empty array if the input is missing/empty (no implicit party
+ * seeding — the caller decides what to load).
  *
  * Defensively handles string elements: an older version of saveParty
  * double-stringified each combatant before writing the roster, producing
@@ -143,7 +162,7 @@ export function deserializeCombatant(combatant: any): Combatant {
  * a card full of `undefined`.
  */
 export function deserializeCombatantArray(raw: any): Combatant[] {
-  if (!raw) return getDefaultCombatants()
+  if (!raw) return []
   const parsed = Array.isArray(raw) ? raw : JSON.parse(raw)
   return parsed.map((item: any) =>
     typeof item === 'string' ? deserializeCombatant(JSON.parse(item)) : deserializeCombatant(item),
@@ -158,7 +177,7 @@ export function deserializeCombatantArray(raw: any): Combatant[] {
 export function createCombatantStorageSerializer(storedVersion: number) {
   return {
     read: (v: string): Combatant[] => {
-      if (!v) return getDefaultCombatants()
+      if (!v) return []
       const raw = JSON.parse(v)
       const migrated = migrateCombatants(storedVersion, raw)
       return migrated.map(deserializeCombatant)
@@ -173,7 +192,7 @@ export function createCombatantStorageSerializer(storedVersion: number) {
  */
 export const combatantFirebaseSerializer = {
   read: (v: any): Combatant[] => {
-    if (!v) return getDefaultCombatants()
+    if (!v) return []
     const parsed = Array.isArray(v) ? v : JSON.parse(v)
     return parsed.map(deserializeCombatant)
   },
