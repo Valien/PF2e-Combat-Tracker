@@ -322,6 +322,30 @@ async function copyPlayerUrl(): Promise<void> {
       </PopoverRoot>
 
       <div class="ml-auto flex gap-2">
+        <PartyManager
+          :combatants="combatants"
+          :party-rosters="partyRosters"
+          :active-party-name="activePartyName"
+          @new-pc="
+            (name: string, hp: number, init: number, extras?: Record<string, unknown>) =>
+              $emit('newPc', name, hp, init, extras)
+          "
+          @save-party="$emit('saveParty')"
+          @save-party-as="(name: string) => $emit('savePartyAs', name)"
+          @load-party="$emit('loadParty')"
+          @load-party-by-name="(name: string) => $emit('loadPartyByName', name)"
+          @rename-party="(oldName: string, newName: string) => $emit('renameParty', oldName, newName)"
+          @delete-party="(name: string) => $emit('deleteParty', name)"
+          @remove-from-roster="(name: string) => $emit('removeFromRoster', name)"
+          @load-encounter="(encounter: ModuleEncounter) => $emit('loadEncounter', encounter)"
+        >
+          <template #trigger="{ open }">
+            <button class="btn btn-neutral btn-sm" @click="open">
+              <Icon icon="tabler:users" height="18" />{{ t.party.title }}
+            </button>
+          </template>
+        </PartyManager>
+
         <a v-if="!isOnlineMode" class="btn btn-neutral btn-sm" href="?view=player">
           <Icon icon="tabler:users-group" height="18" />{{ t.dm_actions.playerView }}
         </a>
@@ -416,24 +440,6 @@ async function copyPlayerUrl(): Promise<void> {
       @end-combat="$emit('endCombat')"
     />
 
-    <!-- Party Manager Side Panel -->
-    <PartyManager
-      :combatants="combatants"
-      :party-rosters="partyRosters"
-      :active-party-name="activePartyName"
-      @new-pc="
-        (name: string, hp: number, init: number, extras?: Record<string, unknown>) =>
-          $emit('newPc', name, hp, init, extras)
-      "
-      @save-party="$emit('saveParty')"
-      @save-party-as="(name: string) => $emit('savePartyAs', name)"
-      @load-party="$emit('loadParty')"
-      @load-party-by-name="(name: string) => $emit('loadPartyByName', name)"
-      @rename-party="(oldName: string, newName: string) => $emit('renameParty', oldName, newName)"
-      @delete-party="(name: string) => $emit('deleteParty', name)"
-      @remove-from-roster="(name: string) => $emit('removeFromRoster', name)"
-      @load-encounter="(encounter: ModuleEncounter) => $emit('loadEncounter', encounter)"
-    />
   </div>
 </template>
 

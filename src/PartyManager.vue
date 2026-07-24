@@ -198,16 +198,8 @@ function handleLoadEncounter(encounter: ModuleEncounter): void {
 </script>
 
 <template>
-  <!-- Toggle button (visible when panel is closed) -->
-  <button
-    v-if="!isOpen"
-    class="btn btn-neutral btn-sm fixed right-0 top-1/2 -translate-y-1/2 z-40 rounded-r-none"
-    :aria-label="t.party.toggle"
-    @click="isOpen = true"
-  >
-    <Icon icon="tabler:users" height="18" />
-    <span class="hidden lg:inline">{{ t.party.title }}</span>
-  </button>
+  <!-- Trigger slot: lets the host render the toggle button in its own toolbar -->
+  <slot name="trigger" :open="() => (isOpen = true)" :is-open="isOpen"></slot>
 
   <!-- Side Panel -->
   <Transition
