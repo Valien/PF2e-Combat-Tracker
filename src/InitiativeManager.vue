@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch, onMounted } from 'vue'
-import { Combatant, getDefaultCombatants, Visibility } from './functions.ts'
+import { Combatant, Visibility } from './functions.ts'
 import { useStorage } from '@vueuse/core'
 import DMView from './DMView.vue'
 import PlayerView from './PlayerView.vue'
@@ -91,7 +91,7 @@ function initializeState() {
     // For DM: Load existing localStorage data to use as defaults
     let defaultTurn = 0
     let defaultRound = 1
-    let defaultCombatantsData = getDefaultCombatants()
+    let defaultCombatantsData: Combatant[] = []
 
     if (isDMView.value && !isSharedPlayerLink.value) {
       // Try to load existing localStorage data
@@ -161,7 +161,7 @@ function initializeState() {
     // Offline mode with localStorage (DM only)
     _turn = useStorage('turn', 0)
     _round = useStorage('round', 1)
-    _combatants = useStorage('combatants', getDefaultCombatants(), undefined, {
+    _combatants = useStorage('combatants', [], undefined, {
       serializer: createCombatantStorageSerializer(storedSchemaVersion),
     })
 
@@ -364,13 +364,18 @@ function removeCombatant(index: number): void {
 }
 
 /**
- * Reset combat to default state
- * Restores default combatants, resets turn to 0 and round to 1
+ * Reset combat for a new encounter.
+ * Restores the last saved player party (via `loadParty`, which falls back to
+ * the first available roster and no-ops if no party is saved, leaving
+ * combatants empty), then resets turn to 0 and round to 1.
+ *
+ * "New combat" intentionally does NOT seed the iconic sample party — the DM
+ * gets their own saved roster back, or an empty list to build from scratch.
  */
 function resetToDefaults(): void {
   turn.value = 0
   round.value = 1
-  combatants.value = getDefaultCombatants()
+  loadParty()
 }
 
 // --- Party roster storage (multiple named parties, reactive) ---
