@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { computed, watch } from 'vue'
 import { Combatant } from './functions.ts'
 import { Icon } from '@iconify/vue'
 import { useTranslations } from './lang.ts'
@@ -29,21 +29,16 @@ const emit = defineEmits<{
   (e: 'endCombat'): void
 }>()
 
-// Track which monsters the DM marks as defeated. Auto-tick on open for
-// monsters at HP <= 0 (the common case); DM can override by ticking
-// monsters that were killed and removed earlier in the encounter, or
-// unticking ones that survived.
-const defeatedIds = ref<Set<string>>(new Set())
-
-// Recompute the defaults whenever the modal opens. Using a watcher on isOpen
-// rather than a computed so the DM's manual checkbox changes don't get reset
-// on every re-render — only on open.
+// Auto-tick the defeated flag on open for monsters at HP <= 0 that haven't
+// been explicitly marked yet (covers pre-v5 state where currentHP <= 0 but
+// defeated defaulted to false). The DM can override by checking/unchecking
+// — the checkbox writes directly to the combatant's `defeated` field.
 function syncDefaultsOnOpen() {
-  const next = new Set<string>()
   for (const c of props.combatants) {
-    if (c.type === 'monster' && c.currentHP <= 0) next.add(c.name)
+    if (c.type === 'monster' && c.currentHP <= 0 && !c.defeated) {
+      c.defeated = true
+    }
   }
-  defeatedIds.value = next
 }
 
 // Vue 3 reactivity: defineProps are reactive, but we still want to react to
@@ -58,17 +53,13 @@ watch(
 
 const monsterRows = computed(() => props.combatants.filter((c) => c.type === 'monster'))
 
-function toggleDefeated(name: string) {
-  const next = new Set(defeatedIds.value)
-  if (next.has(name)) next.delete(name)
-  else next.add(name)
-  defeatedIds.value = next
+function toggleDefeated(combatant: Combatant) {
+  combatant.defeated = !combatant.defeated
 }
 
 const totalXP = computed(() =>
   monsterRows.value.reduce(
-    (sum, m) =>
-      defeatedIds.value.has(m.name) ? sum + computeMonsterXP(m.level, partyLevel.value) : sum,
+    (sum, m) => (m.defeated ? sum + computeMonsterXP(m.level, partyLevel.value) : sum),
     0,
   ),
 )
@@ -141,8 +132,8 @@ function confirmEndCombat() {
                         <input
                           type="checkbox"
                           class="checkbox checkbox-sm checkbox-warning"
-                          :checked="defeatedIds.has(m.name)"
-                          @change="toggleDefeated(m.name)"
+                          :checked="m.defeated"
+                          @change="toggleDefeated(m)"
                         />
                       </td>
                       <td class="truncate max-w-48" :title="m.name">{{ m.name }}</td>
@@ -153,7 +144,7 @@ function confirmEndCombat() {
                         {{ m.currentHP }}/{{ m.totalHP }}
                       </td>
                       <td class="text-right font-mono">
-                        <span v-if="defeatedIds.has(m.name)" class="badge badge-sm badge-success">
+                        <span v-if="m.defeated" class="badge badge-sm badge-success">
                           {{ computeMonsterXP(m.level, partyLevel) }}
                         </span>
                         <span v-else class="text-base-content/40">—</span>

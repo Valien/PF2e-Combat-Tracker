@@ -77,6 +77,8 @@ type TranslationStructure = {
     reaction: string
     resetActions: string
     strike: string
+    markDefeated: string
+    revive: string
     quickActions: string
     stride: string
     step: string
@@ -225,6 +227,8 @@ const translations: Record<Locale, TranslationStructure> = {
       reaction: 'Reaction',
       resetActions: 'Reset Actions',
       strike: 'Strike',
+      markDefeated: 'Mark Defeated',
+      revive: 'Revive',
       quickActions: 'Quick Actions',
       stride: 'Stride',
       step: 'Step',
@@ -403,6 +407,8 @@ const translations: Record<Locale, TranslationStructure> = {
       reaction: 'Reação',
       resetActions: 'Resetar Ações',
       strike: 'Golpe',
+      markDefeated: 'Marcar Derrotado',
+      revive: 'Reviver',
       quickActions: 'Ações Rápidas',
       stride: 'Deslocar',
       step: 'Passo',

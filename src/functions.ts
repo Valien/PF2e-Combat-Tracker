@@ -183,6 +183,17 @@ class Combatant {
   // Invariant: strikesUsed <= actionsUsed (every strike is also an action).
   strikesUsed: number
 
+  // --- Schema v5 field (defeat tracking) ---
+  // PF2e RAW: monsters/NPCs die at 0 HP (no dying track — that's PC-only).
+  // `defeated` is set automatically when a monster/NPC's HP drops to 0 via
+  // damage, and cleared automatically when healed above 0. PCs are never
+  // auto-defeated (they use the dying/wounded system). The DM can toggle
+  // it manually via the skull button on any combatant. Defeated combatants
+  // stay in the list (for XP at end of combat) but are skipped during turn
+  // advancement. Independent of `visibility` — a defeated Full-visibility
+  // monster still shows on the board, just greyed and turn-skipped.
+  defeated: boolean
+
   constructor(
     name: string,
     totalHP: number,
@@ -214,6 +225,7 @@ class Combatant {
       actionsUsed?: number
       reactionUsed?: boolean
       strikesUsed?: number
+      defeated?: boolean
     } = {},
   ) {
     this.name = name
@@ -251,6 +263,9 @@ class Combatant {
 
     // Schema v4 field
     this.strikesUsed = extras.strikesUsed ?? 0
+
+    // Schema v5 field
+    this.defeated = extras.defeated ?? false
   }
 
   /**
@@ -329,6 +344,31 @@ class Combatant {
       if (this.tempHP <= 0) {
         this.maxTempHP = 0
       }
+    }
+
+    // PF2e defeat tracking: monsters/NPCs are defeated when HP drops to 0
+    // (no dying track for non-PCs). PCs use the dying/wounded system, so
+    // they are never auto-defeated — the DM toggles the skull manually.
+    // Healing above 0 clears the flag for any combatant.
+    if (this.currentHP <= 0 && this.type !== 'pc') {
+      this.defeated = true
+    } else if (this.currentHP > 0) {
+      this.defeated = false
+    }
+  }
+
+  /**
+   * Manually toggle the defeated state. Used by the skull button on the
+   * combatant card. When marking defeated: drops currentHP to 0 (so the HP
+   * bar shows 0 red, consistent with EndCombatModal's 0-HP detection).
+   * When reviving: leaves HP at 0 — the DM heals separately.
+   */
+  public toggleDefeated() {
+    this.defeated = !this.defeated
+    if (this.defeated) {
+      this.currentHP = 0
+      this.tempHP = 0
+      this.maxTempHP = 0
     }
   }
 

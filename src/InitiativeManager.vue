@@ -270,7 +270,8 @@ function reset() {
 function nextTurn() {
   if (
     orderedCombatants.value.every(
-      (combatant: Combatant) => combatant.visibility === Visibility.None,
+      (combatant: Combatant) =>
+        combatant.visibility === Visibility.None || combatant.defeated,
     )
   ) {
     return
@@ -287,7 +288,8 @@ function nextTurn() {
     }
   } while (
     newTurn <= orderedCombatants.value.length - 1 &&
-    orderedCombatants.value[newTurn].visibility === Visibility.None
+    (orderedCombatants.value[newTurn].visibility === Visibility.None ||
+      orderedCombatants.value[newTurn].defeated)
   )
 
   turn.value = newTurn
@@ -304,7 +306,8 @@ function nextTurn() {
 function prevTurn() {
   if (
     orderedCombatants.value.every(
-      (combatant: Combatant) => combatant.visibility === Visibility.None,
+      (combatant: Combatant) =>
+        combatant.visibility === Visibility.None || combatant.defeated,
     )
   ) {
     return
@@ -325,7 +328,8 @@ function prevTurn() {
   } while (
     newTurn >= 0 &&
     newTurn <= orderedCombatants.value.length - 1 &&
-    orderedCombatants.value[newTurn].visibility === Visibility.None
+    (orderedCombatants.value[newTurn].visibility === Visibility.None ||
+      orderedCombatants.value[newTurn].defeated)
   )
 
   turn.value = newTurn

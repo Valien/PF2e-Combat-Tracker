@@ -21,7 +21,11 @@ import { useStorage } from '@vueuse/core'
 //     (Strike, Grapple, Trip, Shove, Disarm), not move/skill actions, so
 //     strikesUsed is tracked separately from actionsUsed. Defaults to 0 so
 //     v1/v2/v3 state rehydrates at full MAP on the next strike.
-export const CURRENT_SCHEMA_VERSION = 4
+// v5: Combatant gains `defeated` (boolean). Monsters/NPCs auto-defeat at 0 HP;
+//     PCs never auto-defeat. Defaults to false so existing state rehydrates
+//     as alive. Independent of visibility — defeated combatants stay in the
+//     list for XP but are skipped during turn advancement.
+export const CURRENT_SCHEMA_VERSION = 5
 
 // Storage key holding the version number of the persisted combat state.
 export const SCHEMA_VERSION_KEY = 'schemaVersion'
@@ -82,6 +86,16 @@ const migrations: Record<number, MigrationFn> = {
     return {
       ...raw,
       strikesUsed: raw.strikesUsed ?? 0,
+    }
+  },
+  5: (raw) => {
+    // v4 -> v5: add `defeated` boolean. Defaults to false so existing
+    // combatants rehydrate as alive. The DM's existing `currentHP <= 0`
+    // heuristic in EndCombatModal stays as a fallback during the modal's
+    // auto-tick, so no state is lost — `defeated` is the explicit flag.
+    return {
+      ...raw,
+      defeated: raw.defeated ?? false,
     }
   },
 }
@@ -146,6 +160,7 @@ export function deserializeCombatant(combatant: any): Combatant {
       actionsUsed: combatant.actionsUsed,
       reactionUsed: combatant.reactionUsed,
       strikesUsed: combatant.strikesUsed,
+      defeated: combatant.defeated,
     },
   )
 }

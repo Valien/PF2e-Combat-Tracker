@@ -142,6 +142,7 @@ const hasStatBlock = computed(
       {
         'ring-2 ring-accent shadow-accent/30': isActive,
         'opacity-60': combatant.visibility === Visibility.None,
+        'opacity-50': combatant.defeated,
       },
     ]"
   >
@@ -178,6 +179,17 @@ const hasStatBlock = computed(
             height="18"
           />
           <Icon v-else icon="tabler:eye-closed" height="18" />
+        </button>
+
+        <!-- Defeat toggle (DM only) -->
+        <button
+          v-if="!isReadOnly"
+          class="btn btn-ghost btn-xs"
+          :class="combatant.defeated ? 'text-error' : 'text-base-content/30'"
+          :title="combatant.defeated ? t.card.revive : t.card.markDefeated"
+          @click="combatant.toggleDefeated()"
+        >
+          <Icon icon="tabler:skull" height="18" />
         </button>
 
         <!-- Delete (DM only) -->

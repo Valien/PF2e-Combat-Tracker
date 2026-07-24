@@ -100,6 +100,117 @@ describe('Combatant - HP Management', () => {
   })
 })
 
+describe('Combatant - Defeat tracking', () => {
+  it('should default to not defeated', () => {
+    const combatant = new Combatant('Goblin', 6, 2, 6, [], Visibility.Half, 0, 0, {
+      type: 'monster',
+    })
+    expect(combatant.defeated).toBe(false)
+  })
+
+  it('should auto-defeat a monster when HP drops to 0 via damage', () => {
+    const combatant = new Combatant('Goblin', 6, 2, 6, [], Visibility.Half, 0, 0, {
+      type: 'monster',
+    })
+    combatant.changeHP(-6)
+    expect(combatant.currentHP).toBe(0)
+    expect(combatant.defeated).toBe(true)
+  })
+
+  it('should auto-defeat an NPC when HP drops to 0 via damage', () => {
+    const combatant = new Combatant('Guard', 8, 1, 8, [], Visibility.Half, 0, 0, {
+      type: 'npc',
+    })
+    combatant.changeHP(-8)
+    expect(combatant.currentHP).toBe(0)
+    expect(combatant.defeated).toBe(true)
+  })
+
+  it('should NOT auto-defeat a PC when HP drops to 0 (PF2e dying track)', () => {
+    const combatant = new Combatant('Fighter', 25, 10, 25, [], Visibility.Full, 0, 0, {
+      type: 'pc',
+    })
+    combatant.changeHP(-25)
+    expect(combatant.currentHP).toBe(0)
+    expect(combatant.defeated).toBe(false)
+  })
+
+  it('should not set defeated when damage does not reach 0 HP', () => {
+    const combatant = new Combatant('Goblin', 6, 2, 6, [], Visibility.Half, 0, 0, {
+      type: 'monster',
+    })
+    combatant.changeHP(-5)
+    expect(combatant.currentHP).toBe(1)
+    expect(combatant.defeated).toBe(false)
+  })
+
+  it('should clear defeated when healed above 0', () => {
+    const combatant = new Combatant('Goblin', 6, 2, 0, [], Visibility.Half, 0, 0, {
+      type: 'monster',
+      defeated: true,
+    })
+    expect(combatant.defeated).toBe(true)
+    combatant.changeHP(3)
+    expect(combatant.currentHP).toBe(3)
+    expect(combatant.defeated).toBe(false)
+  })
+
+  it('should clear a manually-set PC defeated flag when healed above 0', () => {
+    const combatant = new Combatant('Fighter', 25, 10, 0, [], Visibility.Full, 0, 0, {
+      type: 'pc',
+      defeated: true,
+    })
+    expect(combatant.defeated).toBe(true)
+    combatant.changeHP(10)
+    expect(combatant.currentHP).toBe(10)
+    expect(combatant.defeated).toBe(false)
+  })
+
+  it('should NOT clear defeated when healing keeps HP at 0 (overheal at 0)', () => {
+    const combatant = new Combatant('Goblin', 6, 2, 0, [], Visibility.Half, 0, 0, {
+      type: 'monster',
+      defeated: true,
+    })
+    combatant.changeHP(0)
+    expect(combatant.currentHP).toBe(0)
+    expect(combatant.defeated).toBe(true)
+  })
+
+  it('should respect temp HP absorbing damage before defeat', () => {
+    const combatant = new Combatant('Goblin', 6, 2, 6, [], Visibility.Half, 0, 0, {
+      type: 'monster',
+    })
+    combatant.addTempHP(5)
+    combatant.changeHP(-5)
+    expect(combatant.tempHP).toBe(0)
+    expect(combatant.currentHP).toBe(6)
+    expect(combatant.defeated).toBe(false)
+  })
+
+  it('toggleDefeated marks defeated and drops HP to 0', () => {
+    const combatant = new Combatant('Goblin', 6, 2, 4, [], Visibility.Half, 0, 0, {
+      type: 'monster',
+    })
+    combatant.addTempHP(5)
+    expect(combatant.defeated).toBe(false)
+    combatant.toggleDefeated()
+    expect(combatant.defeated).toBe(true)
+    expect(combatant.currentHP).toBe(0)
+    expect(combatant.tempHP).toBe(0)
+    expect(combatant.maxTempHP).toBe(0)
+  })
+
+  it('toggleDefeated revives (defeated=false) and leaves HP at 0', () => {
+    const combatant = new Combatant('Goblin', 6, 2, 0, [], Visibility.Half, 0, 0, {
+      type: 'monster',
+      defeated: true,
+    })
+    combatant.toggleDefeated()
+    expect(combatant.defeated).toBe(false)
+    expect(combatant.currentHP).toBe(0)
+  })
+})
+
 describe('Combatant - Visibility', () => {
   it('should initialize with Half visibility by default', () => {
     const combatant = new Combatant('Fighter', 25, 10)
@@ -674,8 +785,8 @@ describe('Schema migration (v2 -> v4)', () => {
     expect(combatant.strikesUsed).toBe(1)
   })
 
-  it('should be a no-op when stored version equals current (v4)', () => {
-    const v4Combatant = {
+  it('should be a no-op when stored version equals current (v5)', () => {
+    const v5Combatant = {
       name: 'X',
       totalHP: 10,
       initiative: 1,
@@ -688,12 +799,13 @@ describe('Schema migration (v2 -> v4)', () => {
       actionsUsed: 0,
       reactionUsed: false,
       strikesUsed: 0,
+      defeated: false,
     }
-    const migrated = migrateCombatants(CURRENT_SCHEMA_VERSION, [v4Combatant])
-    expect(migrated[0]).toEqual(v4Combatant)
+    const migrated = migrateCombatants(CURRENT_SCHEMA_VERSION, [v5Combatant])
+    expect(migrated[0]).toEqual(v5Combatant)
   })
 
-  it('should migrate v1 all the way to v4 in one pass', () => {
+  it('should migrate v1 all the way to v5 in one pass', () => {
     const v1Combatant = {
       name: 'Amiri',
       totalHP: 22,
@@ -712,6 +824,8 @@ describe('Schema migration (v2 -> v4)', () => {
     expect(migrated[0].reactionUsed).toBe(false)
     // v4 fields
     expect(migrated[0].strikesUsed).toBe(0)
+    // v5 fields
+    expect(migrated[0].defeated).toBe(false)
     // Condition got v2 upgrade
     expect(migrated[0].conditions[0].duration).toBeNull()
   })
@@ -760,6 +874,74 @@ describe('Schema migration (v2 -> v4)', () => {
     }
     const migrated = migrateCombatants(3, [v3Combatant])
     expect(migrated[0].strikesUsed).toBe(2)
+  })
+})
+
+describe('Schema migration (v4 -> v5)', () => {
+  it('should add defeated=false to v4 combatants', () => {
+    const v4Combatant = {
+      name: 'Goblin',
+      totalHP: 6,
+      initiative: 2,
+      currentHP: 6,
+      conditions: [],
+      visibility: 1,
+      tempHP: 0,
+      maxTempHP: 0,
+      type: 'monster',
+      actionsUsed: 0,
+      reactionUsed: false,
+      strikesUsed: 0,
+    }
+    const migrated = migrateCombatants(4, [v4Combatant])
+    expect(migrated[0].defeated).toBe(false)
+    // existing fields preserved
+    expect(migrated[0].type).toBe('monster')
+    expect(migrated[0].actionsUsed).toBe(0)
+  })
+
+  it('should preserve an existing defeated=true when migrating v4 -> v5', () => {
+    const v4Combatant = {
+      name: 'Slain Boss',
+      totalHP: 50,
+      initiative: 5,
+      currentHP: 0,
+      conditions: [],
+      visibility: 2,
+      tempHP: 0,
+      maxTempHP: 0,
+      type: 'monster',
+      actionsUsed: 0,
+      reactionUsed: false,
+      strikesUsed: 0,
+      defeated: true,
+    }
+    const migrated = migrateCombatants(4, [v4Combatant])
+    expect(migrated[0].defeated).toBe(true)
+  })
+
+  it('should deserialize v5 combatant with defeated=true into class instance', () => {
+    const v5Combatant = {
+      name: 'Dragon',
+      totalHP: 100,
+      initiative: 8,
+      currentHP: 0,
+      conditions: [],
+      visibility: 2,
+      tempHP: 0,
+      maxTempHP: 0,
+      type: 'monster',
+      level: 5,
+      actionsUsed: 0,
+      reactionUsed: false,
+      strikesUsed: 0,
+      defeated: true,
+    }
+    const migrated = migrateCombatants(5, [v5Combatant])
+    const combatant = deserializeCombatant(migrated[0])
+    expect(combatant).toBeInstanceOf(Combatant)
+    expect(combatant.defeated).toBe(true)
+    expect(combatant.currentHP).toBe(0)
   })
 })
 
