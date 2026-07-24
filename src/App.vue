@@ -79,7 +79,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="fixed top-1 right-1 z-50 flex gap-1">
+  <div class="fixed bottom-1 right-1 z-50 flex gap-1">
     <PopoverRoot>
       <PopoverTrigger as-child>
         <button class="btn btn-neutral btn-sm btn-circle" :aria-label="t.options.language">
